@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { supabase, Paciente } from "@/lib/supabase";
+import { Botao, BotaoVoltar } from "@/components/Botao";
 
 export default function DetalhePacientePage() {
   const router = useRouter();
@@ -61,7 +62,7 @@ export default function DetalhePacientePage() {
 
   if (carregando) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-night-950">
+      <div className="min-h-[100dvh] flex items-center justify-center bg-ink-950">
         <p className="text-mist-300 text-sm">Carregando...</p>
       </div>
     );
@@ -69,31 +70,28 @@ export default function DetalhePacientePage() {
 
   if (!paciente) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-night-950">
+      <div className="min-h-[100dvh] flex items-center justify-center bg-ink-950">
         <p className="text-mist-300 text-sm">Paciente não encontrado.</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-night-950 px-4 sm:px-8 py-6 sm:py-10">
+    <div className="min-h-[100dvh] bg-ink-950 px-4 sm:px-8 py-6 sm:py-10">
       <div className="max-w-lg mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h1 className="font-display text-2xl text-mist-100">
             {paciente.nome}
           </h1>
           {!editando && (
-            <button
-              onClick={() => setEditando(true)}
-              className="text-clay text-xs border border-clay/40 rounded-full px-3 py-1.5"
-            >
+            <Botao onClick={() => setEditando(true)} variante="secundario">
               Editar
-            </button>
+            </Botao>
           )}
         </div>
 
         {!editando ? (
-          <div className="bg-night-900 border border-night-800 rounded-2xl p-6 space-y-4">
+          <div className="bg-ink-900 border border-ink-800 rounded-2xl p-6 space-y-4">
             <Campo label="Idade" valor={paciente.idade ? `${paciente.idade} anos` : "—"} />
             <Campo label="Tipo de tratamento" valor={paciente.tipo_tratamento || "—"} />
             <Campo label="Medicamentos" valor={paciente.medicamentos || "—"} />
@@ -101,7 +99,7 @@ export default function DetalhePacientePage() {
 
             <button
               onClick={handleExcluir}
-              className="text-xs text-clay/80 hover:text-clay pt-2"
+              className="text-xs text-dusk hover:text-clay pt-2 transition-colors"
             >
               Excluir paciente
             </button>
@@ -109,7 +107,7 @@ export default function DetalhePacientePage() {
         ) : (
           <form
             onSubmit={handleSalvar}
-            className="bg-night-900 border border-night-800 rounded-2xl p-6 space-y-4"
+            className="bg-ink-900 border border-ink-800 rounded-2xl p-6 space-y-4"
           >
             <div>
               <label className="block text-mist-300 text-xs mb-1.5">Nome</label>
@@ -118,7 +116,7 @@ export default function DetalhePacientePage() {
                 onChange={(e) =>
                   setPaciente({ ...paciente, nome: e.target.value })
                 }
-                className="w-full bg-night-800 border border-night-700 rounded-lg px-3 py-2.5 text-mist-100 text-sm outline-none focus:border-clay"
+                className="w-full bg-ink-800 border border-ink-700 rounded-lg px-3 py-2.5 text-mist-100 text-base sm:text-sm outline-none focus:border-clay"
               />
             </div>
             <div>
@@ -132,7 +130,7 @@ export default function DetalhePacientePage() {
                     idade: e.target.value ? parseInt(e.target.value) : null,
                   })
                 }
-                className="w-full bg-night-800 border border-night-700 rounded-lg px-3 py-2.5 text-mist-100 text-sm outline-none focus:border-clay"
+                className="w-full bg-ink-800 border border-ink-700 rounded-lg px-3 py-2.5 text-mist-100 text-base sm:text-sm outline-none focus:border-clay"
               />
             </div>
             <div>
@@ -144,7 +142,7 @@ export default function DetalhePacientePage() {
                 onChange={(e) =>
                   setPaciente({ ...paciente, tipo_tratamento: e.target.value })
                 }
-                className="w-full bg-night-800 border border-night-700 rounded-lg px-3 py-2.5 text-mist-100 text-sm outline-none focus:border-clay"
+                className="w-full bg-ink-800 border border-ink-700 rounded-lg px-3 py-2.5 text-mist-100 text-base sm:text-sm outline-none focus:border-clay"
               />
             </div>
             <div>
@@ -156,7 +154,7 @@ export default function DetalhePacientePage() {
                 onChange={(e) =>
                   setPaciente({ ...paciente, medicamentos: e.target.value })
                 }
-                className="w-full bg-night-800 border border-night-700 rounded-lg px-3 py-2.5 text-mist-100 text-sm outline-none focus:border-clay"
+                className="w-full bg-ink-800 border border-ink-700 rounded-lg px-3 py-2.5 text-mist-100 text-base sm:text-sm outline-none focus:border-clay"
               />
             </div>
             <div>
@@ -169,35 +167,34 @@ export default function DetalhePacientePage() {
                 onChange={(e) =>
                   setPaciente({ ...paciente, observacoes: e.target.value })
                 }
-                className="w-full bg-night-800 border border-night-700 rounded-lg px-3 py-2.5 text-mist-100 text-sm outline-none focus:border-clay resize-none"
+                className="w-full bg-ink-800 border border-ink-700 rounded-lg px-3 py-2.5 text-mist-100 text-base sm:text-sm outline-none focus:border-clay resize-none"
               />
             </div>
 
             <div className="flex gap-2 pt-2">
-              <button
+              <Botao
                 type="button"
+                variante="contorno"
                 onClick={() => setEditando(false)}
-                className="flex-1 border border-night-700 text-mist-300 text-sm rounded-lg py-2.5"
+                className="flex-1"
               >
                 Cancelar
-              </button>
-              <button
+              </Botao>
+              <Botao
                 type="submit"
+                variante="primario"
                 disabled={salvando}
-                className="flex-1 bg-clay hover:bg-clay/90 text-white text-sm rounded-lg py-2.5 disabled:opacity-60"
+                className="flex-1"
               >
                 {salvando ? "Salvando..." : "Salvar alterações"}
-              </button>
+              </Botao>
             </div>
           </form>
         )}
 
-        <button
-          onClick={() => router.push("/pacientes")}
-          className="mt-6 text-mist-300 text-xs hover:text-clay"
-        >
-          ← Voltar para a lista
-        </button>
+        <div className="mt-6">
+          <BotaoVoltar href="/pacientes" label="Voltar para a lista" />
+        </div>
       </div>
     </div>
   );

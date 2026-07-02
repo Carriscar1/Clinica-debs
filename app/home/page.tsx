@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { supabase, Profile } from "@/lib/supabase";
 import SalaDeEspera from "@/components/SalaDeEspera";
+import { Botao } from "@/components/Botao";
 
 export default function HomePage() {
   const router = useRouter();
@@ -47,10 +48,7 @@ export default function HomePage() {
 
   async function salvarCorTapete(cor: string) {
     if (!profile) return;
-    await supabase
-      .from("profiles")
-      .update({ cor_tapete: cor })
-      .eq("id", profile.id);
+    await supabase.from("profiles").update({ cor_tapete: cor }).eq("id", profile.id);
   }
 
   async function handleLogout() {
@@ -60,78 +58,86 @@ export default function HomePage() {
 
   if (carregando || !profile) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-night-950">
+      <div className="min-h-[100dvh] flex items-center justify-center bg-ink-950">
         <p className="text-mist-200 text-sm">Preparando sua sala...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-night-950 px-4 sm:px-8 py-6 sm:py-10">
-      <div className="max-w-3xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <p className="text-mist-300 text-xs tracking-wide uppercase mb-1">
-              {new Date().toLocaleDateString("pt-BR", {
-                weekday: "long",
-                day: "2-digit",
-                month: "long",
-              })}
-            </p>
-            <h1 className="font-display text-2xl sm:text-3xl text-mist-100">
-              Bem-vinda, Dra. {profile.nome.split(" ")[0]}
-            </h1>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="text-mist-300 hover:text-clay text-xs border border-night-700 rounded-full px-3 py-1.5 transition-colors"
-          >
-            Sair
-          </button>
-        </div>
+    <div className="relative min-h-[100dvh] overflow-hidden">
+      {/* Sala de espera preenchendo a tela inteira, interativa */}
+      <SalaDeEspera
+        corTapeteInicial={profile.cor_tapete || "#c97b5e"}
+        onSalvarCor={salvarCorTapete}
+        className="absolute inset-0 w-full h-full select-none touch-none"
+      />
 
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <SalaDeEspera
-            corTapeteInicial={profile.cor_tapete || "#c97b5e"}
-            onSalvarCor={salvarCorTapete}
-          />
-        </motion.div>
+      {/* Camada de contraste pra legibilidade do conteúdo por cima */}
+      <div className="absolute inset-0 bg-gradient-to-b from-ink-950/75 via-ink-950/20 to-ink-950/85 pointer-events-none" />
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6">
-          <button
-            onClick={() => router.push("/pacientes")}
-            className="bg-night-900 border border-night-800 hover:border-clay/60 rounded-2xl p-4 text-left transition-colors relative"
-          >
-            <span className="text-2xl">📋</span>
-            <p className="text-mist-100 text-sm mt-2">Meus pacientes</p>
-            {totalPacientes !== null && (
-              <span className="absolute top-3 right-3 bg-clay/20 text-clay text-[11px] rounded-full px-2 py-0.5">
-                {totalPacientes}
-              </span>
-            )}
-          </button>
-
-          <button
-            onClick={() => router.push("/pacientes/novo")}
-            className="bg-night-900 border border-night-800 hover:border-clay/60 rounded-2xl p-4 text-left transition-colors"
-          >
-            <span className="text-2xl">➕</span>
-            <p className="text-mist-100 text-sm mt-2">Novo paciente</p>
-          </button>
-
-          {profile.role === "chefe" && (
-            <button
-              onClick={() => router.push("/supervisao")}
-              className="bg-night-900 border border-night-800 hover:border-clay/60 rounded-2xl p-4 text-left transition-colors"
+      {/* Conteúdo flutuando sobre a cena */}
+      <div className="relative z-10 min-h-[100dvh] flex flex-col px-4 sm:px-8 py-6 sm:py-10">
+        <div className="max-w-3xl w-full mx-auto flex-1 flex flex-col">
+          <div className="flex items-start justify-between">
+            <div className="bg-ink-950/40 backdrop-blur-sm rounded-2xl px-4 py-3">
+              <p className="text-mist-300 text-xs tracking-wide uppercase mb-1">
+                {new Date().toLocaleDateString("pt-BR", {
+                  weekday: "long",
+                  day: "2-digit",
+                  month: "long",
+                })}
+              </p>
+              <h1 className="font-display text-2xl sm:text-3xl text-mist-100">
+                Bem-vinda, Dra. {profile.nome.split(" ")[0]}
+              </h1>
+            </div>
+            <Botao
+              onClick={handleLogout}
+              variante="contorno"
+              className="bg-ink-950/40 backdrop-blur-sm"
             >
-              <span className="text-2xl">🧭</span>
-              <p className="text-mist-100 text-sm mt-2">Supervisão da equipe</p>
+              Sair
+            </Botao>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-auto pt-10"
+          >
+            <button
+              onClick={() => router.push("/pacientes")}
+              className="bg-ink-900/70 backdrop-blur-sm border border-ink-700 hover:border-clay/60 rounded-2xl p-4 text-left transition-colors relative"
+            >
+              <span className="text-2xl">📋</span>
+              <p className="text-mist-100 text-sm mt-2">Meus pacientes</p>
+              {totalPacientes !== null && (
+                <span className="absolute top-3 right-3 bg-clay/25 text-clay text-[11px] rounded-full px-2 py-0.5">
+                  {totalPacientes}
+                </span>
+              )}
             </button>
-          )}
+
+            <button
+              onClick={() => router.push("/pacientes/novo")}
+              className="bg-ink-900/70 backdrop-blur-sm border border-ink-700 hover:border-sage/60 rounded-2xl p-4 text-left transition-colors"
+            >
+              <span className="text-2xl">➕</span>
+              <p className="text-mist-100 text-sm mt-2">Novo paciente</p>
+            </button>
+
+            {profile.role === "chefe" && (
+              <button
+                onClick={() => router.push("/supervisao")}
+                className="bg-ink-900/70 backdrop-blur-sm border border-ink-700 hover:border-dusk/60 rounded-2xl p-4 text-left transition-colors"
+              >
+                <span className="text-2xl">🧭</span>
+                <p className="text-mist-100 text-sm mt-2">Supervisão da equipe</p>
+              </button>
+            )}
+          </motion.div>
         </div>
       </div>
     </div>

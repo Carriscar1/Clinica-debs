@@ -1,0 +1,168 @@
+# ============================================================
+# Next.js + TypeScript (.tsx) - .gitignore
+# ============================================================
+
+# =========================
+# Dependencies
+# =========================
+node_modules/
+
+# Package Managers
+.pnpm-store/
+.npm/
+.yarn/
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Bun
+.bun/
+
+# =========================
+# Next.js
+# =========================
+.next/
+out/
+build/
+dist/
+
+# Turbopack
+.turbo/
+
+# =========================
+# TypeScript
+# =========================
+*.tsbuildinfo
+
+# =========================
+# Logs
+# =========================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+bun-debug.log*
+
+# =========================
+# Environment Variables
+# =========================
+.env
+.env.local
+.env.development.local
+.env.production.local
+.env.test.local
+.env*.local
+
+# Keep examples
+!.env.example
+
+# =========================
+# Cache
+# =========================
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+.swc/
+.vercel/cache
+
+# =========================
+# Testing
+# =========================
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+blob-report/
+
+# Cypress
+cypress/videos/
+cypress/screenshots/
+
+# =========================
+# Storybook
+# =========================
+storybook-static/
+
+# =========================
+# Vercel
+# =========================
+.vercel/
+
+# =========================
+# IDEs
+# =========================
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+.idea/
+*.iml
+
+# =========================
+# Operating Systems
+# =========================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# =========================
+# Temporary Files
+# =========================
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+
+# =========================
+# Runtime
+# =========================
+pids/
+*.pid
+*.pid.lock
+
+# =========================
+# Optional Generated Files
+# =========================
+*.tgz
+
+# =========================
+# Firebase
+# =========================
+.firebase/
+
+# =========================
+# Local Databases
+# =========================
+*.sqlite
+*.sqlite3
+
+# Prisma
+prisma/dev.db
+prisma/dev.db-journal
+
+# =========================
+# Miscellaneous
+# =========================
+.envrc
+.direnv/
+
+# Generated source maps
+*.map

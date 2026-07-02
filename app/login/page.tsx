@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import FundoSalaDesfocado from "@/components/FundoSalaDesfocado";
+import { Botao } from "@/components/Botao";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -34,7 +35,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center px-6">
+    <div className="relative min-h-[100dvh] flex items-center justify-center px-6">
       <FundoSalaDesfocado />
 
       <div className="relative w-full max-w-sm">
@@ -49,7 +50,7 @@ export default function LoginPage() {
 
         <form
           onSubmit={handleLogin}
-          className="bg-night-900/80 backdrop-blur-md border border-night-800 rounded-2xl p-6 shadow-soft space-y-4"
+          className="bg-ink-900/80 backdrop-blur-md border border-ink-800 rounded-2xl p-6 shadow-soft space-y-4"
         >
           {erro && (
             <div className="bg-clay/10 border border-clay/40 text-clay text-sm rounded-lg px-3 py-2">
@@ -66,7 +67,7 @@ export default function LoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-night-800 border border-night-700 rounded-lg px-3 py-2.5 text-mist-100 text-sm outline-none focus:border-clay transition-colors"
+              className="w-full bg-ink-800 border border-ink-700 rounded-lg px-3 py-2.5 text-mist-100 text-base sm:text-sm outline-none focus:border-clay transition-colors"
               placeholder="voce@email.com"
             />
           </div>
@@ -80,18 +81,14 @@ export default function LoginPage() {
               required
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
-              className="w-full bg-night-800 border border-night-700 rounded-lg px-3 py-2.5 text-mist-100 text-sm outline-none focus:border-clay transition-colors"
+              className="w-full bg-ink-800 border border-ink-700 rounded-lg px-3 py-2.5 text-mist-100 text-base sm:text-sm outline-none focus:border-clay transition-colors"
               placeholder="••••••••"
             />
           </div>
 
-          <button
-            type="submit"
-            disabled={carregando}
-            className="w-full bg-clay hover:bg-clay/90 text-white text-sm font-medium rounded-lg py-2.5 transition-colors disabled:opacity-60"
-          >
+          <Botao type="submit" variante="primario" disabled={carregando} className="w-full">
             {carregando ? "Entrando..." : "Entrar"}
-          </button>
+          </Botao>
 
           <p className="text-center text-mist-300 text-xs pt-2">
             Ainda não tem conta?{" "}

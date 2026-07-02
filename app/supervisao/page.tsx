@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase, Profile, Paciente } from "@/lib/supabase";
+import { BotaoVoltar } from "@/components/Botao";
 
 type PsicologaComPacientes = Profile & { pacientes: Paciente[] };
 
@@ -57,7 +58,7 @@ export default function SupervisaoPage() {
 
   if (carregando) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-night-950">
+      <div className="min-h-[100dvh] flex items-center justify-center bg-ink-950">
         <p className="text-mist-300 text-sm">Carregando equipe...</p>
       </div>
     );
@@ -65,22 +66,17 @@ export default function SupervisaoPage() {
 
   if (acessoNegado) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-night-950 gap-4">
+      <div className="min-h-[100dvh] flex flex-col items-center justify-center bg-ink-950 gap-4">
         <p className="text-mist-300 text-sm">
           Essa área é exclusiva da psicóloga chefe.
         </p>
-        <button
-          onClick={() => router.push("/home")}
-          className="text-clay text-sm"
-        >
-          Voltar para a home
-        </button>
+        <BotaoVoltar href="/home" label="Voltar para a home" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-night-950 px-4 sm:px-8 py-6 sm:py-10">
+    <div className="min-h-[100dvh] bg-ink-950 px-4 sm:px-8 py-6 sm:py-10">
       <div className="max-w-2xl mx-auto">
         <h1 className="font-display text-2xl text-mist-100 mb-6">
           Supervisão da equipe
@@ -95,7 +91,7 @@ export default function SupervisaoPage() {
             {equipe.map((psi) => (
               <div
                 key={psi.id}
-                className="bg-night-900 border border-night-800 rounded-2xl p-5"
+                className="bg-ink-900 border border-ink-800 rounded-2xl p-5"
               >
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-mist-100 text-sm font-medium">
@@ -111,7 +107,7 @@ export default function SupervisaoPage() {
                     {psi.pacientes.map((p) => (
                       <li
                         key={p.id}
-                        className="text-mist-300 text-xs flex justify-between border-t border-night-800 pt-1.5"
+                        className="text-mist-300 text-xs flex justify-between border-t border-ink-800 pt-1.5"
                       >
                         <span>{p.nome}</span>
                         <span>{p.tipo_tratamento || "—"}</span>
@@ -124,12 +120,9 @@ export default function SupervisaoPage() {
           </div>
         )}
 
-        <button
-          onClick={() => router.push("/home")}
-          className="mt-8 text-mist-300 text-xs hover:text-clay"
-        >
-          ← Voltar para a sala de espera
-        </button>
+        <div className="mt-8">
+          <BotaoVoltar href="/home" label="Voltar para a sala de espera" />
+        </div>
       </div>
     </div>
   );

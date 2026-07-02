@@ -4,7 +4,7 @@ import SalaDeEspera from "./SalaDeEspera";
 
 export default function FundoSalaDesfocado() {
   return (
-    <div className="absolute inset-0 overflow-hidden bg-night-950">
+    <div className="absolute inset-0 overflow-hidden bg-ink-950">
       <div
         className="absolute inset-0 scale-110"
         style={{ filter: "blur(22px) saturate(1.1) brightness(0.7)" }}

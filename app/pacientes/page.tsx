@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase, Paciente } from "@/lib/supabase";
+import { Botao, BotaoVoltar } from "@/components/Botao";
 
 export default function PacientesPage() {
   const router = useRouter();
@@ -35,25 +36,22 @@ export default function PacientesPage() {
   );
 
   return (
-    <div className="min-h-screen bg-night-950 px-4 sm:px-8 py-6 sm:py-10">
+    <div className="min-h-[100dvh] bg-ink-950 px-4 sm:px-8 py-6 sm:py-10">
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h1 className="font-display text-2xl text-mist-100">
             Meus pacientes
           </h1>
-          <button
-            onClick={() => router.push("/pacientes/novo")}
-            className="bg-clay hover:bg-clay/90 text-white text-sm rounded-full px-4 py-2 transition-colors"
-          >
+          <Botao onClick={() => router.push("/pacientes/novo")} variante="primario">
             + Novo
-          </button>
+          </Botao>
         </div>
 
         <input
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
           placeholder="Buscar por nome..."
-          className="w-full bg-night-900 border border-night-800 rounded-xl px-4 py-2.5 text-mist-100 text-sm outline-none focus:border-clay mb-4"
+          className="w-full bg-ink-900 border border-ink-800 rounded-xl px-4 py-2.5 text-mist-100 text-base sm:text-sm outline-none focus:border-clay mb-4"
         />
 
         {carregando ? (
@@ -70,7 +68,7 @@ export default function PacientesPage() {
               <button
                 key={p.id}
                 onClick={() => router.push(`/pacientes/${p.id}`)}
-                className="w-full text-left bg-night-900 border border-night-800 hover:border-clay/60 rounded-xl px-4 py-3 transition-colors flex items-center justify-between"
+                className="w-full text-left bg-ink-900 border border-ink-800 hover:border-clay/60 rounded-xl px-4 py-3 transition-colors flex items-center justify-between"
               >
                 <div>
                   <p className="text-mist-100 text-sm font-medium">
@@ -90,12 +88,9 @@ export default function PacientesPage() {
           </div>
         )}
 
-        <button
-          onClick={() => router.push("/home")}
-          className="mt-8 text-mist-300 text-xs hover:text-clay"
-        >
-          ← Voltar para a sala de espera
-        </button>
+        <div className="mt-8">
+          <BotaoVoltar href="/home" label="Voltar para a sala de espera" />
+        </div>
       </div>
     </div>
   );

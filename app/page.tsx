@@ -18,7 +18,7 @@ export default function RootPage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-night-950">
+    <div className="min-h-[100dvh] flex items-center justify-center bg-ink-950">
       <p className="text-mist-200 font-body text-sm tracking-wide">
         Carregando...
       </p>
