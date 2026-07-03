@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { Users, UserPlus, ShieldCheck, LogOut, type LucideIcon } from "lucide-react";
 import { supabase, Profile } from "@/lib/supabase";
 import SalaDeEspera from "@/components/SalaDeEspera";
-import { Botao } from "@/components/Botao";
+import BottomNav from "@/components/BottomNav";
 
 export default function HomePage() {
   const router = useRouter();
@@ -51,6 +52,11 @@ export default function HomePage() {
     await supabase.from("profiles").update({ cor_tapete: cor }).eq("id", profile.id);
   }
 
+  async function salvarCorParede(cor: string) {
+    if (!profile) return;
+    await supabase.from("profiles").update({ cor_parede: cor }).eq("id", profile.id);
+  }
+
   async function handleLogout() {
     await supabase.auth.signOut();
     router.replace("/login");
@@ -64,82 +70,136 @@ export default function HomePage() {
     );
   }
 
+  const primeiroNome = profile.nome.split(" ")[0];
+  const iniciais = profile.nome
+    .split(" ")
+    .slice(0, 2)
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase();
+
   return (
-    <div className="relative min-h-[100dvh] overflow-hidden">
-      {/* Sala de espera preenchendo a tela inteira, interativa */}
-      <SalaDeEspera
-        corTapeteInicial={profile.cor_tapete || "#c97b5e"}
-        onSalvarCor={salvarCorTapete}
-        className="absolute inset-0 w-full h-full select-none touch-none"
-      />
+    <div className="relative min-h-[100dvh]">
+      {/* Fundo fixo — cobre a tela toda independente de scroll do conteúdo */}
+      <div className="fixed inset-0 overflow-hidden">
+        <SalaDeEspera
+          corTapeteInicial={profile.cor_tapete || "#c97b5e"}
+          corParedeInicial={profile.cor_parede || "#1a2530"}
+          onSalvarCorTapete={salvarCorTapete}
+          onSalvarCorParede={salvarCorParede}
+          className="absolute inset-0 w-full h-full select-none touch-none"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-ink-950/80 via-ink-950/25 to-ink-950/90 pointer-events-none" />
+      </div>
 
-      {/* Camada de contraste pra legibilidade do conteúdo por cima */}
-      <div className="absolute inset-0 bg-gradient-to-b from-ink-950/75 via-ink-950/20 to-ink-950/85 pointer-events-none" />
-
-      {/* Conteúdo flutuando sobre a cena */}
-      <div className="relative z-10 min-h-[100dvh] flex flex-col px-4 sm:px-8 py-6 sm:py-10">
-        <div className="max-w-3xl w-full mx-auto flex-1 flex flex-col">
-          <div className="flex items-start justify-between">
-            <div className="bg-ink-950/40 backdrop-blur-sm rounded-2xl px-4 py-3">
-              <p className="text-mist-300 text-xs tracking-wide uppercase mb-1">
-                {new Date().toLocaleDateString("pt-BR", {
-                  weekday: "long",
-                  day: "2-digit",
-                  month: "long",
-                })}
-              </p>
-              <h1 className="font-display text-2xl sm:text-3xl text-mist-100">
-                Bem-vinda, Dra. {profile.nome.split(" ")[0]}
-              </h1>
+      {/* Conteúdo — rola independente se não couber na tela, nunca corta */}
+      <div
+        className="relative z-10 min-h-[100dvh] flex flex-col px-4 pt-5"
+        style={{ paddingTop: "calc(1.25rem + env(safe-area-inset-top))", paddingBottom: "7.5rem" }}
+      >
+        <div className="max-w-md w-full mx-auto flex-1 flex flex-col">
+          {/* Cabeçalho */}
+          <div className="flex items-center justify-between gap-3 bg-ink-950/45 backdrop-blur-md rounded-2xl px-4 py-3 border border-ink-800/60 shadow-soft">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 shrink-0 rounded-full bg-clay/20 border border-clay/40 flex items-center justify-center">
+                <span className="text-clay text-sm font-semibold">{iniciais}</span>
+              </div>
+              <div className="min-w-0">
+                <p className="text-mist-300 text-[11px] tracking-wide uppercase">
+                  {new Date().toLocaleDateString("pt-BR", {
+                    weekday: "long",
+                    day: "2-digit",
+                    month: "long",
+                  })}
+                </p>
+                <h1 className="font-display text-lg sm:text-xl text-mist-100 truncate">
+                  Olá, Dra. {primeiroNome}
+                </h1>
+              </div>
             </div>
-            <Botao
+            <button
               onClick={handleLogout}
-              variante="contorno"
-              className="bg-ink-950/40 backdrop-blur-sm"
+              aria-label="Sair da conta"
+              className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full text-mist-300 hover:text-clay active:scale-95 border border-ink-700 hover:border-clay/50 transition-all"
             >
-              Sair
-            </Botao>
+              <LogOut size={16} strokeWidth={2} />
+            </button>
           </div>
 
+          {/* Cards de ação */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-auto pt-10"
+            className="mt-auto pt-8 space-y-2.5"
           >
-            <button
+            <CartaoAcao
+              icone={Users}
+              titulo="Meus pacientes"
+              subtitulo={
+                totalPacientes === null
+                  ? "Carregando..."
+                  : `${totalPacientes} ${totalPacientes === 1 ? "paciente" : "pacientes"} acompanhados`
+              }
+              corAcento="clay"
               onClick={() => router.push("/pacientes")}
-              className="bg-ink-900/70 backdrop-blur-sm border border-ink-700 hover:border-clay/60 rounded-2xl p-4 text-left transition-colors relative"
-            >
-              <span className="text-2xl">📋</span>
-              <p className="text-mist-100 text-sm mt-2">Meus pacientes</p>
-              {totalPacientes !== null && (
-                <span className="absolute top-3 right-3 bg-clay/25 text-clay text-[11px] rounded-full px-2 py-0.5">
-                  {totalPacientes}
-                </span>
-              )}
-            </button>
-
-            <button
+            />
+            <CartaoAcao
+              icone={UserPlus}
+              titulo="Novo paciente"
+              subtitulo="Cadastrar um novo acompanhamento"
+              corAcento="sage"
               onClick={() => router.push("/pacientes/novo")}
-              className="bg-ink-900/70 backdrop-blur-sm border border-ink-700 hover:border-sage/60 rounded-2xl p-4 text-left transition-colors"
-            >
-              <span className="text-2xl">➕</span>
-              <p className="text-mist-100 text-sm mt-2">Novo paciente</p>
-            </button>
-
+            />
             {profile.role === "chefe" && (
-              <button
+              <CartaoAcao
+                icone={ShieldCheck}
+                titulo="Supervisão da equipe"
+                subtitulo="Acompanhe as psicólogas vinculadas"
+                corAcento="dusk"
                 onClick={() => router.push("/supervisao")}
-                className="bg-ink-900/70 backdrop-blur-sm border border-ink-700 hover:border-dusk/60 rounded-2xl p-4 text-left transition-colors"
-              >
-                <span className="text-2xl">🧭</span>
-                <p className="text-mist-100 text-sm mt-2">Supervisão da equipe</p>
-              </button>
+              />
             )}
           </motion.div>
         </div>
       </div>
+
+      <BottomNav ehChefe={profile.role === "chefe"} />
     </div>
+  );
+}
+
+function CartaoAcao({
+  icone: Icone,
+  titulo,
+  subtitulo,
+  corAcento,
+  onClick,
+}: {
+  icone: LucideIcon;
+  titulo: string;
+  subtitulo: string;
+  corAcento: "clay" | "sage" | "dusk";
+  onClick: () => void;
+}) {
+  const cores = {
+    clay: "bg-clay/15 text-clay border-clay/30 group-hover:border-clay/60",
+    sage: "bg-sage/15 text-sage border-sage/30 group-hover:border-sage/60",
+    dusk: "bg-dusk/15 text-dusk border-dusk/30 group-hover:border-dusk/60",
+  }[corAcento];
+
+  return (
+    <button
+      onClick={onClick}
+      className="group w-full flex items-center gap-3.5 bg-ink-900/75 backdrop-blur-sm border border-ink-700 hover:border-ink-600 active:scale-[0.98] rounded-2xl px-4 py-3.5 text-left transition-all shadow-soft"
+    >
+      <div className={`shrink-0 w-11 h-11 rounded-xl border flex items-center justify-center transition-colors ${cores}`}>
+        <Icone size={20} strokeWidth={2} />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-mist-100 text-sm font-medium">{titulo}</p>
+        <p className="text-mist-300 text-xs mt-0.5 truncate">{subtitulo}</p>
+      </div>
+    </button>
   );
 }

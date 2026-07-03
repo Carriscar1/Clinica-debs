@@ -11,6 +11,7 @@ create table profiles (
   role text not null check (role in ('chefe', 'psicologa')) default 'psicologa',
   chefe_id uuid references profiles(id) on delete set null,
   cor_tapete text default '#c97b5e',
+  cor_parede text default '#1a2530',
   created_at timestamptz default now()
 );
 

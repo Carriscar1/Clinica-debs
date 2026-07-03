@@ -3,12 +3,15 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { supabase, Paciente } from "@/lib/supabase";
+import { usePerfil } from "@/lib/usePerfil";
 import { Botao, BotaoVoltar } from "@/components/Botao";
+import BottomNav from "@/components/BottomNav";
 
 export default function DetalhePacientePage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
+  const { profile } = usePerfil();
 
   const [paciente, setPaciente] = useState<Paciente | null>(null);
   const [editando, setEditando] = useState(false);
@@ -77,8 +80,12 @@ export default function DetalhePacientePage() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-ink-950 px-4 sm:px-8 py-6 sm:py-10">
+    <div className="min-h-[100dvh] bg-ink-950 px-4 pb-28" style={{ paddingTop: "calc(1.5rem + env(safe-area-inset-top))" }}>
       <div className="max-w-lg mx-auto">
+        <div className="mb-4">
+          <BotaoVoltar href="/pacientes" label="Pacientes" />
+        </div>
+
         <div className="flex items-center justify-between mb-6">
           <h1 className="font-display text-2xl text-mist-100">
             {paciente.nome}
@@ -99,7 +106,7 @@ export default function DetalhePacientePage() {
 
             <button
               onClick={handleExcluir}
-              className="text-xs text-dusk hover:text-clay pt-2 transition-colors"
+              className="text-xs text-dusk hover:text-clay pt-2 transition-colors underline decoration-dotted underline-offset-4"
             >
               Excluir paciente
             </button>
@@ -191,11 +198,9 @@ export default function DetalhePacientePage() {
             </div>
           </form>
         )}
-
-        <div className="mt-6">
-          <BotaoVoltar href="/pacientes" label="Voltar para a lista" />
-        </div>
       </div>
+
+      <BottomNav ehChefe={profile?.role === "chefe"} />
     </div>
   );
 }

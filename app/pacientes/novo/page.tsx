@@ -3,10 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
+import { usePerfil } from "@/lib/usePerfil";
 import { Botao } from "@/components/Botao";
+import BottomNav from "@/components/BottomNav";
 
 export default function NovoPacientePage() {
   const router = useRouter();
+  const { profile } = usePerfil();
   const [nome, setNome] = useState("");
   const [idade, setIdade] = useState("");
   const [tipoTratamento, setTipoTratamento] = useState("");
@@ -46,7 +49,7 @@ export default function NovoPacientePage() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-ink-950 px-4 sm:px-8 py-6 sm:py-10">
+    <div className="min-h-[100dvh] bg-ink-950 px-4 pb-28" style={{ paddingTop: "calc(1.5rem + env(safe-area-inset-top))" }}>
       <div className="max-w-lg mx-auto">
         <h1 className="font-display text-2xl text-mist-100 mb-6">
           Novo paciente
@@ -138,6 +141,8 @@ export default function NovoPacientePage() {
           </div>
         </form>
       </div>
+
+      <BottomNav ehChefe={profile?.role === "chefe"} />
     </div>
   );
 }

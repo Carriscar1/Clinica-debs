@@ -16,7 +16,7 @@ export default function FundoSalaDesfocado() {
         />
       </div>
       {/* Camada escura extra pra garantir contraste com o formulário */}
-      <div className="absolute inset-0 bg-night-950/55" />
+      <div className="absolute inset-0 bg-ink-950/55" />
     </div>
   );
 }

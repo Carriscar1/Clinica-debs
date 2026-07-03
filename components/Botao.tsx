@@ -2,6 +2,7 @@
 
 import { ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 
 type Variante = "primario" | "secundario" | "contorno" | "fantasma";
 
@@ -36,7 +37,7 @@ export function Botao({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`text-sm font-medium rounded-full px-4 py-2.5 transition-colors disabled:opacity-60 ${ESTILOS[variante]} ${className}`}
+      className={`text-sm font-medium rounded-full px-4 py-2.5 transition-all active:scale-[0.97] disabled:opacity-60 disabled:active:scale-100 ${ESTILOS[variante]} ${className}`}
     >
       {children}
     </button>
@@ -54,9 +55,9 @@ export function BotaoVoltar({
   return (
     <button
       onClick={() => router.push(href)}
-      className="inline-flex items-center gap-1.5 text-mist-300 hover:text-clay text-xs font-medium border border-ink-700 hover:border-clay/50 rounded-full px-3 py-1.5 transition-colors"
+      className="inline-flex items-center gap-1.5 text-mist-300 hover:text-clay active:scale-95 text-xs font-medium border border-ink-700 hover:border-clay/50 rounded-full pl-2.5 pr-3.5 py-1.5 transition-all"
     >
-      <span aria-hidden>←</span>
+      <ArrowLeft size={14} strokeWidth={2.2} aria-hidden />
       {label}
     </button>
   );

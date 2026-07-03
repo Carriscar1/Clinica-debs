@@ -17,6 +17,7 @@ export type Profile = {
   role: "chefe" | "psicologa";
   chefe_id: string | null;
   cor_tapete: string | null;
+  cor_parede: string | null;
   created_at: string;
 };
 

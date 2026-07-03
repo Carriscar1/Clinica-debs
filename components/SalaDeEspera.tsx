@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import SalaDeEsperaIlustrada from "./SalaDeEsperaIlustrada";
 
-const CORES_TAPETE = [
+export const CORES_TAPETE = [
   { nome: "Terracota", valor: "#b5623f" },
   { nome: "Mostarda", valor: "#c99a3d" },
   { nome: "Verde-oliva", valor: "#6b7a4f" },
@@ -12,20 +12,32 @@ const CORES_TAPETE = [
   { nome: "Areia", valor: "#bfab84" },
 ];
 
+export const CORES_PAREDE = [
+  { nome: "Grafite", valor: "#1a2530" },
+  { nome: "Petróleo", valor: "#1c333a" },
+  { nome: "Verde-musgo", valor: "#26302a" },
+  { nome: "Ameixa", valor: "#2a2334" },
+  { nome: "Areia-escura", valor: "#332c22" },
+];
+
 const CAMINHO_FOTO = "/scene/ambiente.jpg";
 
 export default function SalaDeEspera({
   corTapeteInicial,
-  onSalvarCor,
+  corParedeInicial,
+  onSalvarCorTapete,
+  onSalvarCorParede,
   interativo = true,
   className,
 }: {
   corTapeteInicial: string;
-  onSalvarCor?: (cor: string) => void;
+  corParedeInicial?: string;
+  onSalvarCorTapete?: (cor: string) => void;
+  onSalvarCorParede?: (cor: string) => void;
   interativo?: boolean;
   className?: string;
 }) {
-  const [temFoto, setTemFoto] = useState<boolean | null>(null); // null = ainda checando
+  const [temFoto, setTemFoto] = useState<boolean | null>(null);
 
   useEffect(() => {
     const img = new Image();
@@ -34,13 +46,13 @@ export default function SalaDeEspera({
     img.src = CAMINHO_FOTO;
   }, []);
 
-  // Enquanto checa (ou se não achar a foto), usa a versão ilustrada —
-  // que já é o comportamento atual do app, sem quebrar nada.
   if (temFoto !== true) {
     return (
       <SalaDeEsperaIlustrada
         corTapeteInicial={corTapeteInicial}
-        onSalvarCor={onSalvarCor}
+        corParedeInicial={corParedeInicial}
+        onSalvarCorTapete={onSalvarCorTapete}
+        onSalvarCorParede={onSalvarCorParede}
         interativo={interativo}
         className={className}
       />
@@ -50,26 +62,35 @@ export default function SalaDeEspera({
   return (
     <SalaDeEsperaFoto
       corTapeteInicial={corTapeteInicial}
-      onSalvarCor={onSalvarCor}
+      corParedeInicial={corParedeInicial || "#1a2530"}
+      onSalvarCorTapete={onSalvarCorTapete}
+      onSalvarCorParede={onSalvarCorParede}
       interativo={interativo}
       className={className}
     />
   );
 }
 
+type AreaAtiva = "tapete" | "parede" | null;
+
 function SalaDeEsperaFoto({
   corTapeteInicial,
-  onSalvarCor,
+  corParedeInicial,
+  onSalvarCorTapete,
+  onSalvarCorParede,
   interativo,
   className,
 }: {
   corTapeteInicial: string;
-  onSalvarCor?: (cor: string) => void;
+  corParedeInicial: string;
+  onSalvarCorTapete?: (cor: string) => void;
+  onSalvarCorParede?: (cor: string) => void;
   interativo: boolean;
   className?: string;
 }) {
   const [corTapete, setCorTapete] = useState(corTapeteInicial);
-  const [mostrarCores, setMostrarCores] = useState(false);
+  const [corParede, setCorParede] = useState(corParedeInicial);
+  const [areaAtiva, setAreaAtiva] = useState<AreaAtiva>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const x = useMotionValue(0);
@@ -77,7 +98,6 @@ function SalaDeEsperaFoto({
   const springX = useSpring(x, { stiffness: 90, damping: 18 });
   const springY = useSpring(y, { stiffness: 90, damping: 18 });
 
-  // leve efeito de paralaxe na foto, como se a câmera reagisse ao toque
   const parallaxX = useTransform(springX, [-150, 150], [-8, 8]);
   const parallaxY = useTransform(springY, [-100, 100], [-6, 6]);
   const parallaxScale = useTransform(springY, [-100, 0, 100], [1.03, 1.0, 1.03]);
@@ -98,10 +118,16 @@ function SalaDeEsperaFoto({
     y.set(0);
   }
 
-  function escolherCor(c: (typeof CORES_TAPETE)[number]) {
-    setCorTapete(c.valor);
-    setMostrarCores(false);
-    onSalvarCor?.(c.valor);
+  function escolherCorTapete(cor: string) {
+    setCorTapete(cor);
+    setAreaAtiva(null);
+    onSalvarCorTapete?.(cor);
+  }
+
+  function escolherCorParede(cor: string) {
+    setCorParede(cor);
+    setAreaAtiva(null);
+    onSalvarCorParede?.(cor);
   }
 
   return (
@@ -126,19 +152,39 @@ function SalaDeEsperaFoto({
         }}
       />
 
-      {/* Overlay de recoloração do tapete, alinhado sobre a foto real.
-          Ajuste top/left/width/height em % pra encaixar no seu tapete. */}
+      {/* Área da parede — recolorável */}
+      <motion.button
+        type="button"
+        aria-label="Trocar a cor da parede"
+        onClick={() => interativo && setAreaAtiva((v) => (v === "parede" ? null : "parede"))}
+        className="absolute mix-blend-color"
+        style={{
+          left: "0%",
+          top: "0%",
+          width: "100%",
+          height: "40%",
+          backgroundColor: corParede,
+          opacity: 0.6,
+          cursor: interativo ? "pointer" : "default",
+          border: "none",
+          padding: 0,
+          WebkitMaskImage: "linear-gradient(to bottom, black 70%, transparent 100%)",
+          maskImage: "linear-gradient(to bottom, black 70%, transparent 100%)",
+        }}
+        whileTap={interativo ? { scale: 0.99 } : undefined}
+      />
+
+      {/* Área do tapete — recolorável */}
       <motion.button
         type="button"
         aria-label="Trocar a cor do tapete"
-        onClick={() => interativo && setMostrarCores((v) => !v)}
+        onClick={() => interativo && setAreaAtiva((v) => (v === "tapete" ? null : "tapete"))}
         className="absolute mix-blend-color"
         style={{
           left: "0%",
           top: "63%",
           width: "100%",
           height: "30%",
-          borderRadius: "0",
           backgroundColor: corTapete,
           opacity: 0.55,
           cursor: interativo ? "pointer" : "default",
@@ -159,6 +205,8 @@ function SalaDeEsperaFoto({
         />
       )}
 
+      {/* Vinheta puramente decorativa — pointer-events-none é essencial,
+          senão ela bloqueia os toques nas áreas clicáveis acima */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -169,25 +217,33 @@ function SalaDeEsperaFoto({
 
       {interativo && (
         <>
-          <div className="absolute top-3 right-3 text-mist-300/70 text-[10px] sm:text-xs bg-ink-950/40 backdrop-blur px-2 py-1 rounded-full">
-            toque no tapete para trocar a cor · arraste na sala
+          <div className="absolute top-3 right-3 text-mist-300/80 text-[10px] sm:text-xs bg-ink-950/50 backdrop-blur px-2.5 py-1 rounded-full pointer-events-none">
+            toque no tapete ou na parede para personalizar
           </div>
 
-          {mostrarCores && (
+          {areaAtiva && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 bg-ink-950/70 backdrop-blur px-3 py-2 rounded-full"
+              className="fixed z-40 left-1/2 -translate-x-1/2 bg-ink-950/90 backdrop-blur px-3 py-2.5 rounded-2xl border border-ink-700/60 shadow-soft"
+              style={{ bottom: "calc(96px + env(safe-area-inset-bottom))" }}
             >
-              {CORES_TAPETE.map((c) => (
-                <button
-                  key={c.valor}
-                  onClick={() => escolherCor(c)}
-                  title={c.nome}
-                  className="w-6 h-6 rounded-full border-2 border-white/30 hover:scale-110 transition-transform"
-                  style={{ backgroundColor: c.valor }}
-                />
-              ))}
+              <p className="text-mist-300 text-[10px] text-center mb-1.5 uppercase tracking-wide">
+                {areaAtiva === "tapete" ? "Cor do tapete" : "Cor da parede"}
+              </p>
+              <div className="flex gap-2">
+                {(areaAtiva === "tapete" ? CORES_TAPETE : CORES_PAREDE).map((c) => (
+                  <button
+                    key={c.valor}
+                    onClick={() =>
+                      areaAtiva === "tapete" ? escolherCorTapete(c.valor) : escolherCorParede(c.valor)
+                    }
+                    title={c.nome}
+                    className="w-9 h-9 rounded-full border-2 border-white/30 hover:scale-110 active:scale-95 transition-transform"
+                    style={{ backgroundColor: c.valor }}
+                  />
+                ))}
+              </div>
             </motion.div>
           )}
         </>

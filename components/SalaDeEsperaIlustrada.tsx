@@ -11,23 +11,36 @@ const CORES_TAPETE = [
   { nome: "Areia", valor: "#bfab84", escuro: "#8f7d5c" },
 ];
 
+const CORES_PAREDE = [
+  { nome: "Grafite", valor: "#1a2530" },
+  { nome: "Petróleo", valor: "#1c333a" },
+  { nome: "Verde-musgo", valor: "#26302a" },
+  { nome: "Ameixa", valor: "#2a2334" },
+  { nome: "Areia-escura", valor: "#332c22" },
+];
+
 export default function SalaDeEsperaIlustrada({
   corTapeteInicial,
-  onSalvarCor,
+  corParedeInicial,
+  onSalvarCorTapete,
+  onSalvarCorParede,
   interativo = true,
   className,
 }: {
   corTapeteInicial: string;
-  onSalvarCor?: (cor: string) => void;
+  corParedeInicial?: string;
+  onSalvarCorTapete?: (cor: string) => void;
+  onSalvarCorParede?: (cor: string) => void;
   interativo?: boolean;
   className?: string;
 }) {
   const uid = useId().replace(/:/g, "");
   const [corTapete, setCorTapete] = useState(corTapeteInicial);
+  const [corParede, setCorParede] = useState(corParedeInicial || "#1a2530");
   const [corEscuraTapete, setCorEscuraTapete] = useState(
     CORES_TAPETE.find((c) => c.valor === corTapeteInicial)?.escuro || "#8a4630"
   );
-  const [mostrarCores, setMostrarCores] = useState(false);
+  const [areaAtiva, setAreaAtiva] = useState<"tapete" | "parede" | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const x = useMotionValue(0);
@@ -56,11 +69,17 @@ export default function SalaDeEsperaIlustrada({
     y.set(0);
   }
 
-  function escolherCor(c: (typeof CORES_TAPETE)[number]) {
+  function escolherCorTapete(c: (typeof CORES_TAPETE)[number]) {
     setCorTapete(c.valor);
     setCorEscuraTapete(c.escuro);
-    setMostrarCores(false);
-    onSalvarCor?.(c.valor);
+    setAreaAtiva(null);
+    onSalvarCorTapete?.(c.valor);
+  }
+
+  function escolherCorParede(c: (typeof CORES_PAREDE)[number]) {
+    setCorParede(c.valor);
+    setAreaAtiva(null);
+    onSalvarCorParede?.(c.valor);
   }
 
   return (
@@ -80,8 +99,8 @@ export default function SalaDeEsperaIlustrada({
       >
         <defs>
           <linearGradient id={`parede-${uid}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#1e3a52" />
-            <stop offset="60%" stopColor="#15293b" />
+            <stop offset="0%" stopColor={corParede} stopOpacity="0.9" />
+            <stop offset="60%" stopColor={corParede} />
             <stop offset="100%" stopColor="#0f1e2c" />
           </linearGradient>
 
@@ -133,7 +152,15 @@ export default function SalaDeEsperaIlustrada({
           </filter>
         </defs>
 
-        <rect x="0" y="0" width="800" height="330" fill={`url(#parede-${uid})`} />
+        <rect
+          x="0"
+          y="0"
+          width="800"
+          height="330"
+          fill={`url(#parede-${uid})`}
+          onClick={() => interativo && setAreaAtiva((v) => (v === "parede" ? null : "parede"))}
+          style={{ cursor: interativo ? "pointer" : "default" }}
+        />
         <rect x="0" y="322" width="800" height="8" fill="#0a1622" opacity="0.6" />
         <rect x="0" y="330" width="800" height="170" fill={`url(#piso-${uid})`} />
         {[0, 1, 2, 3, 4, 5, 6].map((i) => (
@@ -163,7 +190,7 @@ export default function SalaDeEsperaIlustrada({
         <rect x="60" y="70" width="90" height="140" fill="#e8c9a8" opacity="0.06" />
 
         <motion.g
-          onClick={() => interativo && setMostrarCores((v) => !v)}
+          onClick={() => interativo && setAreaAtiva((v) => (v === "tapete" ? null : "tapete"))}
           style={{ cursor: interativo ? "pointer" : "default" }}
           whileTap={interativo ? { scale: 0.98 } : undefined}
         >
@@ -255,25 +282,41 @@ export default function SalaDeEsperaIlustrada({
 
       {interativo && (
         <>
-          <div className="absolute top-3 right-3 text-mist-300/70 text-[10px] sm:text-xs bg-night-950/40 backdrop-blur px-2 py-1 rounded-full">
-            toque no tapete para trocar a cor · arraste na sala
+          <div className="absolute top-3 right-3 text-mist-300/70 text-[10px] sm:text-xs bg-ink-950/40 backdrop-blur px-2 py-1 rounded-full pointer-events-none">
+            toque no tapete ou na parede para personalizar
           </div>
 
-          {mostrarCores && (
+          {areaAtiva && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2 bg-night-950/70 backdrop-blur px-3 py-2 rounded-full"
+              className="fixed z-40 left-1/2 -translate-x-1/2 bg-ink-950/90 backdrop-blur px-3 py-2.5 rounded-2xl border border-ink-700/60 shadow-soft"
+              style={{ bottom: "calc(96px + env(safe-area-inset-bottom))" }}
             >
-              {CORES_TAPETE.map((c) => (
-                <button
-                  key={c.valor}
-                  onClick={() => escolherCor(c)}
-                  title={c.nome}
-                  className="w-6 h-6 rounded-full border-2 border-white/30 hover:scale-110 transition-transform"
-                  style={{ backgroundColor: c.valor }}
-                />
-              ))}
+              <p className="text-mist-300 text-[10px] text-center mb-1.5 uppercase tracking-wide">
+                {areaAtiva === "tapete" ? "Cor do tapete" : "Cor da parede"}
+              </p>
+              <div className="flex gap-2">
+                {areaAtiva === "tapete"
+                  ? CORES_TAPETE.map((c) => (
+                      <button
+                        key={c.valor}
+                        onClick={() => escolherCorTapete(c)}
+                        title={c.nome}
+                        className="w-9 h-9 rounded-full border-2 border-white/30 hover:scale-110 active:scale-95 transition-transform"
+                        style={{ backgroundColor: c.valor }}
+                      />
+                    ))
+                  : CORES_PAREDE.map((c) => (
+                      <button
+                        key={c.valor}
+                        onClick={() => escolherCorParede(c)}
+                        title={c.nome}
+                        className="w-9 h-9 rounded-full border-2 border-white/30 hover:scale-110 active:scale-95 transition-transform"
+                        style={{ backgroundColor: c.valor }}
+                      />
+                    ))}
+              </div>
             </motion.div>
           )}
         </>
