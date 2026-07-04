@@ -92,14 +92,17 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-gradient-to-b from-ink-950/80 via-ink-950/25 to-ink-950/90 pointer-events-none" />
       </div>
 
-      {/* Conteúdo — rola independente se não couber na tela, nunca corta */}
+      {/* Conteúdo — rola independente se não couber na tela, nunca corta.
+          pointer-events-none aqui é essencial: essa camada cobre a tela
+          inteira, inclusive o espaço "vazio" sobre o sofá — sem isso, ela
+          bloqueia o toque na cena por trás mesmo onde não há nada desenhado. */}
       <div
-        className="relative z-10 min-h-[100dvh] flex flex-col px-4 pt-5"
+        className="relative z-10 min-h-[100dvh] flex flex-col px-4 pointer-events-none"
         style={{ paddingTop: "calc(1.25rem + env(safe-area-inset-top))", paddingBottom: "7.5rem" }}
       >
-        <div className="max-w-md w-full mx-auto flex-1 flex flex-col">
+        <div className="max-w-md w-full mx-auto flex-1 flex flex-col pointer-events-none">
           {/* Cabeçalho */}
-          <div className="flex items-center justify-between gap-3 bg-ink-950/45 backdrop-blur-md rounded-2xl px-4 py-3 border border-ink-800/60 shadow-soft">
+          <div className="pointer-events-auto flex items-center justify-between gap-3 bg-ink-950/45 backdrop-blur-md rounded-2xl px-4 py-3 border border-ink-800/60 shadow-soft">
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-10 h-10 shrink-0 rounded-full bg-clay/20 border border-clay/40 flex items-center justify-center">
                 <span className="text-clay text-sm font-semibold">{iniciais}</span>
@@ -126,12 +129,16 @@ export default function HomePage() {
             </button>
           </div>
 
+          <p className="pointer-events-none text-center text-mist-300/70 text-[11px] mt-3 px-4">
+            Toque no sofá ou na parede da cena pra personalizar as cores
+          </p>
+
           {/* Cards de ação */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="mt-auto pt-8 space-y-2.5"
+            className="pointer-events-auto mt-auto pt-8 space-y-2.5"
           >
             <CartaoAcao
               icone={Users}

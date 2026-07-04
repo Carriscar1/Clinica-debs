@@ -217,21 +217,21 @@ function SalaDeEsperaFoto({
 
       {interativo && (
         <>
-          <div className="absolute top-3 right-3 text-mist-300/80 text-[10px] sm:text-xs bg-ink-950/50 backdrop-blur px-2.5 py-1 rounded-full pointer-events-none">
-            toque no tapete ou na parede para personalizar
-          </div>
-
           {areaAtiva && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="fixed z-40 left-1/2 -translate-x-1/2 bg-ink-950/90 backdrop-blur px-3 py-2.5 rounded-2xl border border-ink-700/60 shadow-soft"
-              style={{ bottom: "calc(96px + env(safe-area-inset-bottom))" }}
+              style={{
+                x: "-50%",
+                left: "50%",
+                bottom: "calc(96px + env(safe-area-inset-bottom))",
+              }}
+              className="fixed z-40 bg-ink-950/90 backdrop-blur px-3 py-2.5 rounded-2xl border border-ink-700/60 shadow-soft max-w-[92vw]"
             >
               <p className="text-mist-300 text-[10px] text-center mb-1.5 uppercase tracking-wide">
                 {areaAtiva === "tapete" ? "Cor do tapete" : "Cor da parede"}
               </p>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap justify-center">
                 {(areaAtiva === "tapete" ? CORES_TAPETE : CORES_PAREDE).map((c) => (
                   <button
                     key={c.valor}
@@ -239,7 +239,7 @@ function SalaDeEsperaFoto({
                       areaAtiva === "tapete" ? escolherCorTapete(c.valor) : escolherCorParede(c.valor)
                     }
                     title={c.nome}
-                    className="w-9 h-9 rounded-full border-2 border-white/30 hover:scale-110 active:scale-95 transition-transform"
+                    className="w-9 h-9 shrink-0 rounded-full border-2 border-white/30 hover:scale-110 active:scale-95 transition-transform"
                     style={{ backgroundColor: c.valor }}
                   />
                 ))}
