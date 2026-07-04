@@ -6,12 +6,23 @@ import { createClient } from "@supabase/supabase-js";
 // É a forma correta de permitir essa busca por e-mail durante o
 // cadastro, sem precisar abrir a tabela "profiles" inteira pra
 // leitura anônima (o que exporia e-mail/nome de todo mundo via API).
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL as string,
-  process.env.SUPABASE_SERVICE_ROLE_KEY as string
-);
 
 export async function POST(req: NextRequest) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    console.error(
+      "SUPABASE_SERVICE_ROLE_KEY não configurada nas variáveis de ambiente."
+    );
+    return NextResponse.json(
+      { encontrada: false, erro: "Configuração do servidor incompleta." },
+      { status: 500 }
+    );
+  }
+
+  const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
+
   const { email } = await req.json();
 
   if (!email || typeof email !== "string") {
