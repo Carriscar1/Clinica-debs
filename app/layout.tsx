@@ -38,10 +38,10 @@ export default function RootLayout({
         {children}
         <RegistrarServiceWorker />
         <div
-          className="fixed left-1/2 -translate-x-1/2 z-[60] pointer-events-none select-none"
-          style={{ top: "calc(env(safe-area-inset-top) + 4px)" }}
+          className="fixed right-3 z-20 pointer-events-none select-none"
+          style={{ top: "calc(env(safe-area-inset-top) + 6px)" }}
         >
-          <span className="text-[9px] text-mist-300/40 tracking-wide">
+          <span className="text-[8px] text-mist-300/35 tracking-wide">
             para você, Débora 🤍
           </span>
         </div>

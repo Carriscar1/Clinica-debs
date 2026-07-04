@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "framer-motion";
+import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import SalaDeEsperaIlustrada from "./SalaDeEsperaIlustrada";
+import SeletorCorSheet from "./SeletorCorSheet";
 
 export const CORES_TAPETE = [
   { nome: "Terracota", valor: "#b5623f" },
@@ -281,65 +282,25 @@ function SalaDeEsperaFoto({
       />
 
       {interativo && (
-        <AnimatePresence>
-          {areaAtiva && (
-            <>
-              {/* Fundo escurecido — cobre tudo, inclusive os cards, deixando
-                  claro que é um seletor modal, não um elemento solto na tela */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setAreaAtiva(null)}
-                className="fixed inset-0 z-40 bg-black/60"
-              />
-
-              {/* Bottom sheet — sobe do fundo da tela, sempre na mesma
-                  posição relativa ao aparelho, nunca colide com nada */}
-              <motion.div
-                initial={{ y: "100%" }}
-                animate={{ y: 0 }}
-                exit={{ y: "100%" }}
-                transition={{ type: "spring", damping: 30, stiffness: 320 }}
-                className="fixed left-0 right-0 bottom-0 z-50 bg-ink-900 border-t border-ink-700 rounded-t-3xl px-5 pt-3 shadow-soft"
-                style={{ paddingBottom: "calc(1.75rem + env(safe-area-inset-bottom))" }}
-              >
-                <div className="w-10 h-1 bg-ink-700 rounded-full mx-auto mb-5" />
-                <p className="text-mist-100 text-sm font-semibold text-center mb-5">
-                  {areaAtiva === "tapete"
-                    ? "Cor do tapete"
-                    : areaAtiva === "parede"
-                    ? "Cor da parede"
-                    : "Cor do sofá"}
-                </p>
-                <div className="flex gap-4 justify-center flex-wrap pb-1">
-                  {(areaAtiva === "tapete"
-                    ? CORES_TAPETE
-                    : areaAtiva === "parede"
-                    ? CORES_PAREDE
-                    : CORES_SOFA
-                  ).map((c) => (
-                    <button
-                      key={c.valor}
-                      onClick={() => {
-                        if (areaAtiva === "tapete") escolherCorTapete(c.valor);
-                        else if (areaAtiva === "parede") escolherCorParede(c.valor);
-                        else escolherCorSofa(c.valor);
-                      }}
-                      className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
-                    >
-                      <span
-                        className="w-12 h-12 rounded-full border-2 border-white/20"
-                        style={{ backgroundColor: c.valor }}
-                      />
-                      <span className="text-mist-300 text-[10px]">{c.nome}</span>
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
+        <SeletorCorSheet
+          aberto={areaAtiva !== null}
+          titulo={
+            areaAtiva === "tapete"
+              ? "Cor do tapete"
+              : areaAtiva === "parede"
+              ? "Cor da parede"
+              : "Cor do sofá"
+          }
+          opcoes={
+            areaAtiva === "tapete" ? CORES_TAPETE : areaAtiva === "parede" ? CORES_PAREDE : CORES_SOFA
+          }
+          onEscolher={(c) => {
+            if (areaAtiva === "tapete") escolherCorTapete(c.valor);
+            else if (areaAtiva === "parede") escolherCorParede(c.valor);
+            else escolherCorSofa(c.valor);
+          }}
+          onFechar={() => setAreaAtiva(null)}
+        />
       )}
     </div>
   );

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef, useId } from "react";
-import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "framer-motion";
+import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
+import SeletorCorSheet from "./SeletorCorSheet";
 
 const CORES_TAPETE = [
   { nome: "Terracota", valor: "#b5623f", escuro: "#8a4630" },
@@ -330,80 +331,32 @@ export default function SalaDeEsperaIlustrada({
       />
 
       {interativo && (
-        <AnimatePresence>
-          {areaAtiva && (
-            <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setAreaAtiva(null)}
-                className="fixed inset-0 z-40 bg-black/60"
-              />
-
-              <motion.div
-                initial={{ y: "100%" }}
-                animate={{ y: 0 }}
-                exit={{ y: "100%" }}
-                transition={{ type: "spring", damping: 30, stiffness: 320 }}
-                className="fixed left-0 right-0 bottom-0 z-50 bg-ink-900 border-t border-ink-700 rounded-t-3xl px-5 pt-3 shadow-soft"
-                style={{ paddingBottom: "calc(1.75rem + env(safe-area-inset-bottom))" }}
-              >
-                <div className="w-10 h-1 bg-ink-700 rounded-full mx-auto mb-5" />
-                <p className="text-mist-100 text-sm font-semibold text-center mb-5">
-                  {areaAtiva === "tapete"
-                    ? "Cor do tapete"
-                    : areaAtiva === "parede"
-                    ? "Cor da parede"
-                    : "Cor do sofá"}
-                </p>
-                <div className="flex gap-4 justify-center flex-wrap pb-1">
-                  {areaAtiva === "tapete"
-                    ? CORES_TAPETE.map((c) => (
-                        <button
-                          key={c.valor}
-                          onClick={() => escolherCorTapete(c)}
-                          className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
-                        >
-                          <span
-                            className="w-12 h-12 rounded-full border-2 border-white/20"
-                            style={{ backgroundColor: c.valor }}
-                          />
-                          <span className="text-mist-300 text-[10px]">{c.nome}</span>
-                        </button>
-                      ))
-                    : areaAtiva === "parede"
-                    ? CORES_PAREDE.map((c) => (
-                        <button
-                          key={c.valor}
-                          onClick={() => escolherCorParede(c)}
-                          className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
-                        >
-                          <span
-                            className="w-12 h-12 rounded-full border-2 border-white/20"
-                            style={{ backgroundColor: c.valor }}
-                          />
-                          <span className="text-mist-300 text-[10px]">{c.nome}</span>
-                        </button>
-                      ))
-                    : CORES_SOFA.map((c) => (
-                        <button
-                          key={c.valor}
-                          onClick={() => escolherCorSofa(c)}
-                          className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
-                        >
-                          <span
-                            className="w-12 h-12 rounded-full border-2 border-white/20"
-                            style={{ backgroundColor: c.valor }}
-                          />
-                          <span className="text-mist-300 text-[10px]">{c.nome}</span>
-                        </button>
-                      ))}
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
+        <SeletorCorSheet
+          aberto={areaAtiva !== null}
+          titulo={
+            areaAtiva === "tapete"
+              ? "Cor do tapete"
+              : areaAtiva === "parede"
+              ? "Cor da parede"
+              : "Cor do sofá"
+          }
+          opcoes={
+            areaAtiva === "tapete" ? CORES_TAPETE : areaAtiva === "parede" ? CORES_PAREDE : CORES_SOFA
+          }
+          onEscolher={(c) => {
+            if (areaAtiva === "tapete") {
+              const encontrada = CORES_TAPETE.find((x) => x.valor === c.valor);
+              if (encontrada) escolherCorTapete(encontrada);
+            } else if (areaAtiva === "parede") {
+              const encontrada = CORES_PAREDE.find((x) => x.valor === c.valor);
+              if (encontrada) escolherCorParede(encontrada);
+            } else {
+              const encontrada = CORES_SOFA.find((x) => x.valor === c.valor);
+              if (encontrada) escolherCorSofa(encontrada);
+            }
+          }}
+          onFechar={() => setAreaAtiva(null)}
+        />
       )}
     </div>
   );
