@@ -37,6 +37,14 @@ export default function RootLayout({
       <body>
         {children}
         <RegistrarServiceWorker />
+        <div
+          className="fixed left-1/2 -translate-x-1/2 z-[60] pointer-events-none select-none"
+          style={{ top: "calc(env(safe-area-inset-top) + 4px)" }}
+        >
+          <span className="text-[9px] text-mist-300/40 tracking-wide">
+            para você, Débora 🤍
+          </span>
+        </div>
       </body>
     </html>
   );

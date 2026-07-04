@@ -12,6 +12,7 @@ create table profiles (
   chefe_id uuid references profiles(id) on delete set null,
   cor_tapete text default '#c97b5e',
   cor_parede text default '#1a2530',
+  cor_sofa text default '#22405c',
   created_at timestamptz default now()
 );
 

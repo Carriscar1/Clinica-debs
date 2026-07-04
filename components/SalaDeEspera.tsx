@@ -20,20 +20,34 @@ export const CORES_PAREDE = [
   { nome: "Areia-escura", valor: "#332c22" },
 ];
 
+export const CORES_SOFA = [
+  { nome: "Azul-marinho", valor: "#22405c" },
+  { nome: "Grafite", valor: "#3a3f47" },
+  { nome: "Verde-caça", valor: "#3c4a3a" },
+  { nome: "Vinho", valor: "#5a2f38" },
+  { nome: "Camel", valor: "#8a6a4a" },
+];
+
 const CAMINHO_FOTO = "/scene/ambiente.jpg";
 
 export default function SalaDeEspera({
   corTapeteInicial,
   corParedeInicial,
+  corSofaInicial,
   onSalvarCorTapete,
   onSalvarCorParede,
+  onSalvarCorSofa,
+  onAreaAtivaChange,
   interativo = true,
   className,
 }: {
   corTapeteInicial: string;
   corParedeInicial?: string;
+  corSofaInicial?: string;
   onSalvarCorTapete?: (cor: string) => void;
   onSalvarCorParede?: (cor: string) => void;
+  onSalvarCorSofa?: (cor: string) => void;
+  onAreaAtivaChange?: (aberto: boolean) => void;
   interativo?: boolean;
   className?: string;
 }) {
@@ -51,8 +65,11 @@ export default function SalaDeEspera({
       <SalaDeEsperaIlustrada
         corTapeteInicial={corTapeteInicial}
         corParedeInicial={corParedeInicial}
+        corSofaInicial={corSofaInicial}
         onSalvarCorTapete={onSalvarCorTapete}
         onSalvarCorParede={onSalvarCorParede}
+        onSalvarCorSofa={onSalvarCorSofa}
+        onAreaAtivaChange={onAreaAtivaChange}
         interativo={interativo}
         className={className}
       />
@@ -63,35 +80,53 @@ export default function SalaDeEspera({
     <SalaDeEsperaFoto
       corTapeteInicial={corTapeteInicial}
       corParedeInicial={corParedeInicial || "#1a2530"}
+      corSofaInicial={corSofaInicial || "#22405c"}
       onSalvarCorTapete={onSalvarCorTapete}
       onSalvarCorParede={onSalvarCorParede}
+      onSalvarCorSofa={onSalvarCorSofa}
+      onAreaAtivaChange={onAreaAtivaChange}
       interativo={interativo}
       className={className}
     />
   );
 }
 
-type AreaAtiva = "tapete" | "parede" | null;
+type AreaAtiva = "tapete" | "parede" | "sofa" | null;
 
 function SalaDeEsperaFoto({
   corTapeteInicial,
   corParedeInicial,
+  corSofaInicial,
   onSalvarCorTapete,
   onSalvarCorParede,
+  onSalvarCorSofa,
+  onAreaAtivaChange,
   interativo,
   className,
 }: {
   corTapeteInicial: string;
   corParedeInicial: string;
+  corSofaInicial: string;
   onSalvarCorTapete?: (cor: string) => void;
   onSalvarCorParede?: (cor: string) => void;
+  onSalvarCorSofa?: (cor: string) => void;
+  onAreaAtivaChange?: (aberto: boolean) => void;
   interativo: boolean;
   className?: string;
 }) {
   const [corTapete, setCorTapete] = useState(corTapeteInicial);
   const [corParede, setCorParede] = useState(corParedeInicial);
-  const [areaAtiva, setAreaAtiva] = useState<AreaAtiva>(null);
+  const [corSofa, setCorSofa] = useState(corSofaInicial);
+  const [areaAtiva, setAreaAtivaState] = useState<AreaAtiva>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  function setAreaAtiva(valor: AreaAtiva | ((v: AreaAtiva) => AreaAtiva)) {
+    setAreaAtivaState((atual) => {
+      const novo = typeof valor === "function" ? valor(atual) : valor;
+      onAreaAtivaChange?.(novo !== null);
+      return novo;
+    });
+  }
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -128,6 +163,12 @@ function SalaDeEsperaFoto({
     setCorParede(cor);
     setAreaAtiva(null);
     onSalvarCorParede?.(cor);
+  }
+
+  function escolherCorSofa(cor: string) {
+    setCorSofa(cor);
+    setAreaAtiva(null);
+    onSalvarCorSofa?.(cor);
   }
 
   return (
@@ -172,6 +213,30 @@ function SalaDeEsperaFoto({
           maskImage: "linear-gradient(to bottom, black 70%, transparent 100%)",
         }}
         whileTap={interativo ? { scale: 0.99 } : undefined}
+      />
+
+      {/* Área do sofá — recolorável, encaixada entre a parede e o tapete */}
+      <motion.button
+        type="button"
+        aria-label="Trocar a cor do sofá"
+        onClick={() => interativo && setAreaAtiva((v) => (v === "sofa" ? null : "sofa"))}
+        className="absolute mix-blend-color"
+        style={{
+          left: "0%",
+          top: "40%",
+          width: "100%",
+          height: "23%",
+          backgroundColor: corSofa,
+          opacity: 0.5,
+          cursor: interativo ? "pointer" : "default",
+          border: "none",
+          padding: 0,
+          WebkitMaskImage:
+            "linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%)",
+          maskImage:
+            "linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%)",
+        }}
+        whileTap={interativo ? { scale: 0.98 } : undefined}
       />
 
       {/* Área do tapete — recolorável */}
@@ -241,15 +306,26 @@ function SalaDeEsperaFoto({
               >
                 <div className="w-10 h-1 bg-ink-700 rounded-full mx-auto mb-5" />
                 <p className="text-mist-100 text-sm font-semibold text-center mb-5">
-                  {areaAtiva === "tapete" ? "Cor do tapete" : "Cor da parede"}
+                  {areaAtiva === "tapete"
+                    ? "Cor do tapete"
+                    : areaAtiva === "parede"
+                    ? "Cor da parede"
+                    : "Cor do sofá"}
                 </p>
                 <div className="flex gap-4 justify-center flex-wrap pb-1">
-                  {(areaAtiva === "tapete" ? CORES_TAPETE : CORES_PAREDE).map((c) => (
+                  {(areaAtiva === "tapete"
+                    ? CORES_TAPETE
+                    : areaAtiva === "parede"
+                    ? CORES_PAREDE
+                    : CORES_SOFA
+                  ).map((c) => (
                     <button
                       key={c.valor}
-                      onClick={() =>
-                        areaAtiva === "tapete" ? escolherCorTapete(c.valor) : escolherCorParede(c.valor)
-                      }
+                      onClick={() => {
+                        if (areaAtiva === "tapete") escolherCorTapete(c.valor);
+                        else if (areaAtiva === "parede") escolherCorParede(c.valor);
+                        else escolherCorSofa(c.valor);
+                      }}
                       className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
                     >
                       <span

@@ -13,6 +13,7 @@ export default function HomePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [carregando, setCarregando] = useState(true);
   const [totalPacientes, setTotalPacientes] = useState<number | null>(null);
+  const [seletorAberto, setSeletorAberto] = useState(false);
 
   useEffect(() => {
     async function carregar() {
@@ -57,6 +58,11 @@ export default function HomePage() {
     await supabase.from("profiles").update({ cor_parede: cor }).eq("id", profile.id);
   }
 
+  async function salvarCorSofa(cor: string) {
+    if (!profile) return;
+    await supabase.from("profiles").update({ cor_sofa: cor }).eq("id", profile.id);
+  }
+
   async function handleLogout() {
     await supabase.auth.signOut();
     router.replace("/login");
@@ -85,8 +91,11 @@ export default function HomePage() {
         <SalaDeEspera
           corTapeteInicial={profile.cor_tapete || "#c97b5e"}
           corParedeInicial={profile.cor_parede || "#1a2530"}
+          corSofaInicial={profile.cor_sofa || "#22405c"}
           onSalvarCorTapete={salvarCorTapete}
           onSalvarCorParede={salvarCorParede}
+          onSalvarCorSofa={salvarCorSofa}
+          onAreaAtivaChange={setSeletorAberto}
           className="absolute inset-0 w-full h-full select-none touch-none"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-ink-950/80 via-ink-950/25 to-ink-950/90 pointer-events-none" />
@@ -130,15 +139,21 @@ export default function HomePage() {
           </div>
 
           <p className="pointer-events-none text-center text-mist-300/70 text-[11px] mt-3 px-4">
-            Toque no sofá ou na parede da cena pra personalizar as cores
+            Toque no sofá, na parede ou no tapete da cena pra personalizar as cores
           </p>
 
-          {/* Cards de ação */}
+          {/* Cards de ação — recolhem com uma animação suave enquanto
+              o seletor de cores está aberto, pra nunca disputar espaço
+              com o bottom sheet */}
           <motion.div
+            animate={
+              seletorAberto
+                ? { opacity: 0, y: 16, scale: 0.97 }
+                : { opacity: 1, y: 0, scale: 1 }
+            }
             initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="pointer-events-auto mt-auto pt-8 space-y-2.5"
+            transition={{ duration: 0.35, ease: "easeInOut" }}
+            className={`mt-auto pt-8 space-y-2.5 ${seletorAberto ? "pointer-events-none" : "pointer-events-auto"}`}
           >
             <CartaoAcao
               icone={Users}

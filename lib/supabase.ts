@@ -18,6 +18,7 @@ export type Profile = {
   chefe_id: string | null;
   cor_tapete: string | null;
   cor_parede: string | null;
+  cor_sofa: string | null;
   created_at: string;
 };
 

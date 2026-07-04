@@ -19,29 +19,61 @@ const CORES_PAREDE = [
   { nome: "Areia-escura", valor: "#332c22" },
 ];
 
+const CORES_SOFA = [
+  { nome: "Azul-marinho", valor: "#22405c", claro: "#3a638a", escuro: "#152c40" },
+  { nome: "Grafite", valor: "#3a3f47", claro: "#565c66", escuro: "#24272c" },
+  { nome: "Verde-caça", valor: "#3c4a3a", claro: "#566b53", escuro: "#252e24" },
+  { nome: "Vinho", valor: "#5a2f38", claro: "#7a4550", escuro: "#3c1f26" },
+  { nome: "Camel", valor: "#8a6a4a", claro: "#a68763", escuro: "#5f4830" },
+];
+
 export default function SalaDeEsperaIlustrada({
   corTapeteInicial,
   corParedeInicial,
+  corSofaInicial,
   onSalvarCorTapete,
   onSalvarCorParede,
+  onSalvarCorSofa,
+  onAreaAtivaChange,
   interativo = true,
   className,
 }: {
   corTapeteInicial: string;
   corParedeInicial?: string;
+  corSofaInicial?: string;
   onSalvarCorTapete?: (cor: string) => void;
   onSalvarCorParede?: (cor: string) => void;
+  onSalvarCorSofa?: (cor: string) => void;
+  onAreaAtivaChange?: (aberto: boolean) => void;
   interativo?: boolean;
   className?: string;
 }) {
   const uid = useId().replace(/:/g, "");
   const [corTapete, setCorTapete] = useState(corTapeteInicial);
   const [corParede, setCorParede] = useState(corParedeInicial || "#1a2530");
+  const [corSofaObj, setCorSofaObj] = useState(
+    () => CORES_SOFA.find((c) => c.valor === corSofaInicial) || CORES_SOFA[0]
+  );
   const [corEscuraTapete, setCorEscuraTapete] = useState(
     CORES_TAPETE.find((c) => c.valor === corTapeteInicial)?.escuro || "#8a4630"
   );
-  const [areaAtiva, setAreaAtiva] = useState<"tapete" | "parede" | null>(null);
+  const [areaAtiva, setAreaAtivaState] = useState<"tapete" | "parede" | "sofa" | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  function setAreaAtiva(
+    valor:
+      | "tapete"
+      | "parede"
+      | "sofa"
+      | null
+      | ((v: "tapete" | "parede" | "sofa" | null) => "tapete" | "parede" | "sofa" | null)
+  ) {
+    setAreaAtivaState((atual) => {
+      const novo = typeof valor === "function" ? valor(atual) : valor;
+      onAreaAtivaChange?.(novo !== null);
+      return novo;
+    });
+  }
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -82,6 +114,12 @@ export default function SalaDeEsperaIlustrada({
     onSalvarCorParede?.(c.valor);
   }
 
+  function escolherCorSofa(c: (typeof CORES_SOFA)[number]) {
+    setCorSofaObj(c);
+    setAreaAtiva(null);
+    onSalvarCorSofa?.(c.valor);
+  }
+
   return (
     <div
       ref={containerRef}
@@ -110,13 +148,13 @@ export default function SalaDeEsperaIlustrada({
           </linearGradient>
 
           <linearGradient id={`sofaBase-${uid}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#2f5578" />
-            <stop offset="45%" stopColor="#22405c" />
-            <stop offset="100%" stopColor="#152c40" />
+            <stop offset="0%" stopColor={corSofaObj.claro} />
+            <stop offset="45%" stopColor={corSofaObj.valor} />
+            <stop offset="100%" stopColor={corSofaObj.escuro} />
           </linearGradient>
           <linearGradient id={`sofaEncosto-${uid}`} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#3a638a" />
-            <stop offset="100%" stopColor="#1f3c56" />
+            <stop offset="0%" stopColor={corSofaObj.claro} />
+            <stop offset="100%" stopColor={corSofaObj.valor} />
           </linearGradient>
           <radialGradient id={`almofadaLuz-${uid}`} cx="35%" cy="25%" r="75%">
             <stop offset="0%" stopColor="#5a86ab" stopOpacity="0.9" />
@@ -235,22 +273,33 @@ export default function SalaDeEsperaIlustrada({
         <rect x="205" y="235" width="390" height="120" rx="30" fill={`url(#sofaEncosto-${uid})`} />
         <rect x="205" y="235" width="390" height="120" rx="30" fill={`url(#almofadaLuz-${uid})`} />
 
-        <rect x="195" y="290" width="55" height="130" rx="20" fill="#1c3a54" />
-        <rect x="550" y="290" width="55" height="130" rx="20" fill="#1c3a54" />
+        <rect x="195" y="290" width="55" height="130" rx="20" fill={corSofaObj.escuro} />
+        <rect x="550" y="290" width="55" height="130" rx="20" fill={corSofaObj.escuro} />
         <rect x="195" y="290" width="55" height="130" rx="20" fill={`url(#almofadaLuz-${uid})`} />
         <rect x="550" y="290" width="55" height="130" rx="20" fill={`url(#almofadaLuz-${uid})`} />
 
         <motion.g style={{ rotate: cushionTiltL, scaleY: cushionDepthL, originX: 0.35, originY: 1 }}>
-          <rect x="260" y="260" width="130" height="105" rx="22" fill="#1a3145" />
+          <rect x="260" y="260" width="130" height="105" rx="22" fill={corSofaObj.escuro} />
           <rect x="260" y="260" width="130" height="105" rx="22" fill={`url(#almofadaLuz-${uid})`} />
           <rect x="260" y="260" width="130" height="105" rx="22" fill="none" stroke="#0d1e2c" strokeOpacity="0.5" strokeWidth="2" />
         </motion.g>
 
         <motion.g style={{ rotate: cushionTiltR, scaleY: cushionDepthR, originX: 0.65, originY: 1 }}>
-          <rect x="410" y="260" width="130" height="105" rx="22" fill="#1a3145" />
+          <rect x="410" y="260" width="130" height="105" rx="22" fill={corSofaObj.escuro} />
           <rect x="410" y="260" width="130" height="105" rx="22" fill={`url(#almofadaLuz-${uid})`} />
           <rect x="410" y="260" width="130" height="105" rx="22" fill="none" stroke="#0d1e2c" strokeOpacity="0.5" strokeWidth="2" />
         </motion.g>
+
+        {/* Área clicável cobrindo o sofá inteiro (encosto + base + braços) */}
+        <rect
+          x="195"
+          y="235"
+          width="410"
+          height="190"
+          fill="transparent"
+          onClick={() => interativo && setAreaAtiva((v) => (v === "sofa" ? null : "sofa"))}
+          style={{ cursor: interativo ? "pointer" : "default" }}
+        />
 
         <line x1="325" y1="270" x2="325" y2="355" stroke="#0d1e2c" strokeOpacity="0.35" strokeWidth="1.5" />
         <line x1="475" y1="270" x2="475" y2="355" stroke="#0d1e2c" strokeOpacity="0.35" strokeWidth="1.5" />
@@ -302,7 +351,11 @@ export default function SalaDeEsperaIlustrada({
               >
                 <div className="w-10 h-1 bg-ink-700 rounded-full mx-auto mb-5" />
                 <p className="text-mist-100 text-sm font-semibold text-center mb-5">
-                  {areaAtiva === "tapete" ? "Cor do tapete" : "Cor da parede"}
+                  {areaAtiva === "tapete"
+                    ? "Cor do tapete"
+                    : areaAtiva === "parede"
+                    ? "Cor da parede"
+                    : "Cor do sofá"}
                 </p>
                 <div className="flex gap-4 justify-center flex-wrap pb-1">
                   {areaAtiva === "tapete"
@@ -319,10 +372,24 @@ export default function SalaDeEsperaIlustrada({
                           <span className="text-mist-300 text-[10px]">{c.nome}</span>
                         </button>
                       ))
-                    : CORES_PAREDE.map((c) => (
+                    : areaAtiva === "parede"
+                    ? CORES_PAREDE.map((c) => (
                         <button
                           key={c.valor}
                           onClick={() => escolherCorParede(c)}
+                          className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
+                        >
+                          <span
+                            className="w-12 h-12 rounded-full border-2 border-white/20"
+                            style={{ backgroundColor: c.valor }}
+                          />
+                          <span className="text-mist-300 text-[10px]">{c.nome}</span>
+                        </button>
+                      ))
+                    : CORES_SOFA.map((c) => (
+                        <button
+                          key={c.valor}
+                          onClick={() => escolherCorSofa(c)}
                           className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
                         >
                           <span

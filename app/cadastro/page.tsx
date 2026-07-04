@@ -25,20 +25,25 @@ export default function CadastroPage() {
 
     let chefeId: string | null = null;
 
-    // Se a psicóloga não é chefe, busca o id da chefe pelo e-mail informado
+    // Se a psicóloga não é chefe, busca o id da chefe pelo e-mail informado.
+    // Passa por uma API route porque, nesse momento, a pessoa ainda não
+    // está autenticada (está se cadastrando agora), então não tem
+    // permissão de leitura direta na tabela de perfis.
     if (!ehChefe) {
-      const { data: chefeProfile, error: chefeErro } = await supabase
-        .from("profiles")
-        .select("id, role")
-        .eq("email", emailChefe)
-        .maybeSingle();
+      const resposta = await fetch("/api/buscar-chefe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: emailChefe }),
+      });
 
-      if (chefeErro || !chefeProfile) {
+      const resultado = await resposta.json();
+
+      if (!resposta.ok || !resultado.encontrada) {
         setErro("Não encontramos uma psicóloga chefe com esse e-mail.");
         setCarregando(false);
         return;
       }
-      chefeId = chefeProfile.id;
+      chefeId = resultado.id;
     }
 
     const { data, error } = await supabase.auth.signUp({

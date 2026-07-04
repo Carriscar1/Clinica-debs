@@ -11,13 +11,16 @@ npm install
 ```
 
 ### 2. Configurar o Supabase
-1. Copie `.env.local.example` para `.env.local` e preencha com a URL e a
-   chave anon do seu projeto Supabase.
+1. Copie `.env.local.example` para `.env.local` e preencha com a URL, a
+   chave `anon` e a chave `service_role` do seu projeto Supabase
+   (Settings → API). A `service_role` é nova nesta versão — necessária
+   pra API `/api/buscar-chefe` funcionar (veja explicação mais abaixo).
+   **Nunca** exponha a `service_role` com o prefixo `NEXT_PUBLIC_`.
 2. Vá em **Authentication → Settings** no painel do Supabase e desative
    **"Confirm email"** (o cadastro já loga direto, sem verificação).
 3. No **SQL Editor**, rode o arquivo `supabase-schema.sql` (projeto novo)
-   ou `supabase-migration.sql` (se você já rodou a versão anterior do
-   schema que eu te passei antes).
+   ou os arquivos `supabase-migration*.sql` (se você já rodou uma versão
+   anterior do schema).
 
 ### 3. Rodar localmente
 ```bash
@@ -28,8 +31,9 @@ Acesse `http://localhost:3000`.
 ### 4. Deploy no Vercel
 1. Suba o projeto pro GitHub.
 2. Importe o repositório no Vercel.
-3. Nas variáveis de ambiente do projeto Vercel, adicione
-   `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+3. Nas variáveis de ambiente do projeto Vercel, adicione as três:
+   `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` e
+   `SUPABASE_SERVICE_ROLE_KEY`.
 4. Deploy automático a cada push (igual o IASIS).
 
 ## Estrutura
@@ -65,11 +69,21 @@ lib/
 
 ## A sala de espera interativa
 
-Na home, o sofá tem duas almofadas que reagem ao movimento do
-mouse/dedo (leve "afofar" com física de mola via `framer-motion`), e o
-tapete é clicável — abre um seletor de 5 cores que salva a preferência
-da psicóloga no Supabase (`profiles.cor_tapete`), então cada uma pode
-personalizar a própria sala.
+Na home, sofá, parede e tapete são clicáveis — cada um abre um seletor
+de cores (bottom sheet) que salva a preferência da psicóloga no
+Supabase (`profiles.cor_sofa`, `cor_parede`, `cor_tapete`).
+
+## Por que existe uma API route (`app/api/buscar-chefe`)
+
+Durante o cadastro, quando uma psicóloga se vincula a uma chefe já
+existente, o app precisa confirmar que aquele e-mail pertence a uma
+chefe — mas nesse momento a pessoa ainda não está autenticada (está
+criando a conta agora). Por segurança, a tabela `profiles` só permite
+leitura de usuários já autenticados (RLS). Pra resolver isso sem abrir
+a tabela inteira pra qualquer pessoa não-logada, essa busca passa por
+uma API route no servidor, que usa a chave `service_role` (nunca
+exposta ao navegador) pra confirmar a existência do e-mail e devolver
+só o `id` — nada de nome, e-mail ou qualquer outro dado.
 
 ## Próximos passos sugeridos
 - Agenda de sessões (data/hora, recorrência)
