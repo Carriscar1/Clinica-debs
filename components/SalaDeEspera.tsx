@@ -216,26 +216,30 @@ function SalaDeEsperaFoto({
         whileTap={interativo ? { scale: 0.99 } : undefined}
       />
 
-      {/* Área do sofá — recolorável, encaixada entre a parede e o tapete */}
+      {/* Área do sofá — recolorável, com máscara em formato suave
+          (o sofá é um objeto irregular, diferente da parede/tapete que
+          são superfícies lisas; um retângulo cheio parecia uma mancha) */}
       <motion.button
         type="button"
         aria-label="Trocar a cor do sofá"
         onClick={() => interativo && setAreaAtiva((v) => (v === "sofa" ? null : "sofa"))}
         className="absolute mix-blend-color"
         style={{
-          left: "0%",
-          top: "40%",
-          width: "100%",
-          height: "23%",
+          left: "2%",
+          top: "36%",
+          width: "96%",
+          height: "30%",
           backgroundColor: corSofa,
-          opacity: 0.5,
+          opacity: 0.45,
           cursor: interativo ? "pointer" : "default",
           border: "none",
           padding: 0,
-          WebkitMaskImage:
-            "linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%)",
-          maskImage:
-            "linear-gradient(to bottom, transparent 0%, black 25%, black 75%, transparent 100%)",
+          WebkitMaskImage: "url(/scene/sofa-mascara.png)",
+          maskImage: "url(/scene/sofa-mascara.png)",
+          WebkitMaskSize: "100% 100%",
+          maskSize: "100% 100%",
+          WebkitMaskRepeat: "no-repeat",
+          maskRepeat: "no-repeat",
         }}
         whileTap={interativo ? { scale: 0.98 } : undefined}
       />
