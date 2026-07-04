@@ -85,8 +85,9 @@ export default function SalaDeEsperaIlustrada({
   const cushionTiltR = useTransform(springX, [-150, 150], [3, -3]);
   const cushionDepthL = useTransform(springY, [-100, 100], [1.03, 0.97]);
   const cushionDepthR = useTransform(springY, [-100, 100], [0.97, 1.03]);
-  const luzX = useTransform(springX, (v) => v * 0.5);
-  const luzY = useTransform(springY, (v) => v * 0.5);
+  const lightBg = useTransform([springX, springY], ([lx, ly]: number[]) =>
+    `radial-gradient(circle 260px at calc(50% + ${lx * 0.5}px) calc(45% + ${ly * 0.5}px), rgba(240,211,172,0.55), transparent 70%)`
+  );
 
   function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
     if (!interativo) return;
@@ -315,23 +316,10 @@ export default function SalaDeEsperaIlustrada({
       </svg>
 
       {interativo && (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden mix-blend-soft-light">
-          <motion.div
-            className="absolute rounded-full"
-            style={{
-              width: 520,
-              height: 520,
-              left: "50%",
-              top: "45%",
-              marginLeft: -260,
-              marginTop: -260,
-              x: luzX,
-              y: luzY,
-              background:
-                "radial-gradient(circle, rgba(240,211,172,0.5), transparent 70%)",
-            }}
-          />
-        </div>
+        <motion.div
+          className="absolute inset-0 pointer-events-none mix-blend-soft-light"
+          style={{ background: lightBg }}
+        />
       )}
 
       <div

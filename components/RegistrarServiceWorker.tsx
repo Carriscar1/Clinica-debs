@@ -3,29 +3,20 @@
 import { useEffect } from "react";
 
 /**
- * O Service Worker anterior estava causando erros reais de rede
- * (interceptava a navegação da própria página /home e quebrava com
- * "Failed to convert value to Response"). Como a instalação na tela
- * de início do iPhone NÃO depende de Service Worker — isso é uma
- * peculiaridade só do Android/Chrome, e mesmo lá é só um "bônus" —
- * a decisão mais segura é remover completamente.
- *
- * Esse componente agora ativamente desinstala qualquer Service Worker
- * que já tenha sido registrado em visitas anteriores (importante:
- * simplesmente apagar o arquivo sw.js não desliga o que já está
- * rodando no celular de quem já usou o app antes).
+ * Registra o Service Worker minimalista de public/sw.js — necessário
+ * pro Android/Chrome mostrar o botão de instalação na tela inicial.
+ * A versão anterior tentava fazer cache agressivo de tudo e acabou
+ * quebrando a navegação; essa nova versão só cuida de 3 arquivos
+ * estáticos (ícones/manifest) e não intercepta mais nada.
  */
 export default function RegistrarServiceWorker() {
   useEffect(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
 
-    navigator.serviceWorker.getRegistrations().then((registrations) => {
-      registrations.forEach((registration) => registration.unregister());
+    navigator.serviceWorker.register("/sw.js").catch(() => {
+      // Falha silenciosa: sem o service worker o app funciona normal,
+      // só perde o botão de instalação automática no Android.
     });
-
-    if ("caches" in window) {
-      caches.keys().then((nomes) => nomes.forEach((nome) => caches.delete(nome)));
-    }
   }, []);
 
   return null;

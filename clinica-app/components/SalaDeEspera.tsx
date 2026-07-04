@@ -22,11 +22,11 @@ export const CORES_PAREDE = [
 ];
 
 export const CORES_SOFA = [
-  { nome: "Azul-marinho", valor: "#22405c", imagem: "/scene/ambiente.jpg" },
-  { nome: "Grafite", valor: "#3a3f47", imagem: "/scene/ambiente-sofa-grafite.jpg" },
-  { nome: "Verde-caça", valor: "#3c4a3a", imagem: "/scene/ambiente-sofa-verde.jpg" },
-  { nome: "Vinho", valor: "#5a2f38", imagem: "/scene/ambiente-sofa-vinho.jpg" },
-  { nome: "Camel", valor: "#8a6a4a", imagem: "/scene/ambiente-sofa-camel.jpg" },
+  { nome: "Azul-marinho", valor: "#22405c" },
+  { nome: "Grafite", valor: "#3a3f47" },
+  { nome: "Verde-caça", valor: "#3c4a3a" },
+  { nome: "Vinho", valor: "#5a2f38" },
+  { nome: "Camel", valor: "#8a6a4a" },
 ];
 
 const CAMINHO_FOTO = "/scene/ambiente.jpg";
@@ -119,29 +119,7 @@ function SalaDeEsperaFoto({
   const [corParede, setCorParede] = useState(corParedeInicial);
   const [corSofa, setCorSofa] = useState(corSofaInicial);
   const [areaAtiva, setAreaAtivaState] = useState<AreaAtiva>(null);
-  const [fotosSofaDisponiveis, setFotosSofaDisponiveis] = useState<Record<string, boolean>>({});
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // Verifica, uma vez, quais fotos específicas de cada cor do sofá já
-  // existem — assim que uma imagem real for adicionada, o app troca
-  // pra ela automaticamente. Enquanto não existir, usa o tingimento
-  // por cima da foto padrão (comportamento atual, nunca quebra).
-  useEffect(() => {
-    CORES_SOFA.forEach((c) => {
-      if (c.imagem === CAMINHO_FOTO) {
-        setFotosSofaDisponiveis((prev) => ({ ...prev, [c.valor]: true }));
-        return;
-      }
-      const img = new Image();
-      img.onload = () => setFotosSofaDisponiveis((prev) => ({ ...prev, [c.valor]: true }));
-      img.onerror = () => setFotosSofaDisponiveis((prev) => ({ ...prev, [c.valor]: false }));
-      img.src = c.imagem;
-    });
-  }, []);
-
-  const corSofaAtual = CORES_SOFA.find((c) => c.valor === corSofa);
-  const temFotoDoSofa = !!corSofaAtual && fotosSofaDisponiveis[corSofa] === true;
-  const imagemFundo = temFotoDoSofa && corSofaAtual ? corSofaAtual.imagem : CAMINHO_FOTO;
 
   function setAreaAtiva(valor: AreaAtiva | ((v: AreaAtiva) => AreaAtiva)) {
     setAreaAtivaState((atual) => {
@@ -159,14 +137,9 @@ function SalaDeEsperaFoto({
   const parallaxX = useTransform(springX, [-150, 150], [-8, 8]);
   const parallaxY = useTransform(springY, [-100, 100], [-6, 6]);
   const parallaxScale = useTransform(springY, [-100, 0, 100], [1.03, 1.0, 1.03]);
-
-  // Antes, esse efeito de luz recalculava uma string de gradiente CSS
-  // inteira a cada frame (propriedade "background"), o que força o
-  // navegador a repintar tudo sem parar — pesado demais, especialmente
-  // no Android. Agora o gradiente é fixo (calculado uma única vez) e
-  // só a POSIÇÃO se move via "transform", que a GPU acelera de graça.
-  const luzX = useTransform(springX, (v) => v * 0.6);
-  const luzY = useTransform(springY, (v) => v * 0.6);
+  const lightBg = useTransform([springX, springY], ([lx, ly]: number[]) =>
+    `radial-gradient(circle 300px at calc(50% + ${lx * 0.6}px) calc(45% + ${ly * 0.6}px), rgba(240,211,172,0.35), transparent 70%)`
+  );
 
   function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
     if (!interativo) return;
@@ -215,7 +188,7 @@ function SalaDeEsperaFoto({
           x: parallaxX,
           y: parallaxY,
           scale: parallaxScale,
-          backgroundImage: `url(${imagemFundo})`,
+          backgroundImage: `url(${CAMINHO_FOTO})`,
           backgroundSize: "cover",
           backgroundPosition: "40% center",
         }}
@@ -243,35 +216,30 @@ function SalaDeEsperaFoto({
         whileTap={interativo ? { scale: 0.99 } : undefined}
       />
 
-      {/* Área do sofá — clicável sempre. Só aplica o tingimento por cima
-          quando ainda não existe uma foto real daquela cor específica;
-          assim que a foto existir, a cor já vem certinha da própria
-          imagem, sem precisar de nenhum efeito. */}
+      {/* Área do sofá — recolorável, com máscara em formato suave
+          (o sofá é um objeto irregular, diferente da parede/tapete que
+          são superfícies lisas; um retângulo cheio parecia uma mancha) */}
       <motion.button
         type="button"
         aria-label="Trocar a cor do sofá"
         onClick={() => interativo && setAreaAtiva((v) => (v === "sofa" ? null : "sofa"))}
-        className={`absolute ${temFotoDoSofa ? "" : "mix-blend-color"}`}
+        className="absolute mix-blend-color"
         style={{
           left: "2%",
           top: "36%",
           width: "96%",
           height: "30%",
-          backgroundColor: temFotoDoSofa ? "transparent" : corSofa,
-          opacity: temFotoDoSofa ? 1 : 0.45,
+          backgroundColor: corSofa,
+          opacity: 0.45,
           cursor: interativo ? "pointer" : "default",
           border: "none",
           padding: 0,
-          ...(temFotoDoSofa
-            ? {}
-            : {
-                WebkitMaskImage: "url(/scene/sofa-mascara.png)",
-                maskImage: "url(/scene/sofa-mascara.png)",
-                WebkitMaskSize: "100% 100%",
-                maskSize: "100% 100%",
-                WebkitMaskRepeat: "no-repeat",
-                maskRepeat: "no-repeat",
-              }),
+          WebkitMaskImage: "url(/scene/sofa-mascara.png)",
+          maskImage: "url(/scene/sofa-mascara.png)",
+          WebkitMaskSize: "100% 100%",
+          maskSize: "100% 100%",
+          WebkitMaskRepeat: "no-repeat",
+          maskRepeat: "no-repeat",
         }}
         whileTap={interativo ? { scale: 0.98 } : undefined}
       />
@@ -301,23 +269,10 @@ function SalaDeEsperaFoto({
       />
 
       {interativo && (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden mix-blend-soft-light">
-          <motion.div
-            className="absolute rounded-full"
-            style={{
-              width: 600,
-              height: 600,
-              left: "50%",
-              top: "45%",
-              marginLeft: -300,
-              marginTop: -300,
-              x: luzX,
-              y: luzY,
-              background:
-                "radial-gradient(circle, rgba(240,211,172,0.35), transparent 70%)",
-            }}
-          />
-        </div>
+        <motion.div
+          className="absolute inset-0 pointer-events-none mix-blend-soft-light"
+          style={{ background: lightBg }}
+        />
       )}
 
       {/* Vinheta puramente decorativa — pointer-events-none é essencial,
