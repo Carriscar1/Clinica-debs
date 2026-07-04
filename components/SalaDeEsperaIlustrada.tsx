@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useId } from "react";
-import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "framer-motion";
 
 const CORES_TAPETE = [
   { nome: "Terracota", valor: "#b5623f", escuro: "#8a4630" },
@@ -281,45 +281,62 @@ export default function SalaDeEsperaIlustrada({
       />
 
       {interativo && (
-        <>
+        <AnimatePresence>
           {areaAtiva && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              style={{
-                x: "-50%",
-                left: "50%",
-                bottom: "calc(96px + env(safe-area-inset-bottom))",
-              }}
-              className="fixed z-40 bg-ink-950/90 backdrop-blur px-3 py-2.5 rounded-2xl border border-ink-700/60 shadow-soft max-w-[92vw]"
-            >
-              <p className="text-mist-300 text-[10px] text-center mb-1.5 uppercase tracking-wide">
-                {areaAtiva === "tapete" ? "Cor do tapete" : "Cor da parede"}
-              </p>
-              <div className="flex gap-2 flex-wrap justify-center">
-                {areaAtiva === "tapete"
-                  ? CORES_TAPETE.map((c) => (
-                      <button
-                        key={c.valor}
-                        onClick={() => escolherCorTapete(c)}
-                        title={c.nome}
-                        className="w-9 h-9 shrink-0 rounded-full border-2 border-white/30 hover:scale-110 active:scale-95 transition-transform"
-                        style={{ backgroundColor: c.valor }}
-                      />
-                    ))
-                  : CORES_PAREDE.map((c) => (
-                      <button
-                        key={c.valor}
-                        onClick={() => escolherCorParede(c)}
-                        title={c.nome}
-                        className="w-9 h-9 shrink-0 rounded-full border-2 border-white/30 hover:scale-110 active:scale-95 transition-transform"
-                        style={{ backgroundColor: c.valor }}
-                      />
-                    ))}
-              </div>
-            </motion.div>
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setAreaAtiva(null)}
+                className="fixed inset-0 z-40 bg-black/60"
+              />
+
+              <motion.div
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "100%" }}
+                transition={{ type: "spring", damping: 30, stiffness: 320 }}
+                className="fixed left-0 right-0 bottom-0 z-50 bg-ink-900 border-t border-ink-700 rounded-t-3xl px-5 pt-3 shadow-soft"
+                style={{ paddingBottom: "calc(1.75rem + env(safe-area-inset-bottom))" }}
+              >
+                <div className="w-10 h-1 bg-ink-700 rounded-full mx-auto mb-5" />
+                <p className="text-mist-100 text-sm font-semibold text-center mb-5">
+                  {areaAtiva === "tapete" ? "Cor do tapete" : "Cor da parede"}
+                </p>
+                <div className="flex gap-4 justify-center flex-wrap pb-1">
+                  {areaAtiva === "tapete"
+                    ? CORES_TAPETE.map((c) => (
+                        <button
+                          key={c.valor}
+                          onClick={() => escolherCorTapete(c)}
+                          className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
+                        >
+                          <span
+                            className="w-12 h-12 rounded-full border-2 border-white/20"
+                            style={{ backgroundColor: c.valor }}
+                          />
+                          <span className="text-mist-300 text-[10px]">{c.nome}</span>
+                        </button>
+                      ))
+                    : CORES_PAREDE.map((c) => (
+                        <button
+                          key={c.valor}
+                          onClick={() => escolherCorParede(c)}
+                          className="flex flex-col items-center gap-1.5 active:scale-95 transition-transform"
+                        >
+                          <span
+                            className="w-12 h-12 rounded-full border-2 border-white/20"
+                            style={{ backgroundColor: c.valor }}
+                          />
+                          <span className="text-mist-300 text-[10px]">{c.nome}</span>
+                        </button>
+                      ))}
+                </div>
+              </motion.div>
+            </>
           )}
-        </>
+        </AnimatePresence>
       )}
     </div>
   );
