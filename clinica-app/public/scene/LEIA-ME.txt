@@ -1,7 +1,0 @@
-A imagem "ambiente.jpg" já está aqui — é a foto real da sala de espera
-usada como fundo do app (home, login e cadastro).
-
-Se um dia quiser trocar por outra foto, basta substituir esse arquivo
-mantendo o mesmo nome "ambiente.jpg". Se o tapete da nova foto ficar
-em posição bem diferente, me avise que eu recalibro as coordenadas do
-efeito de cor no componente SalaDeEspera.tsx.

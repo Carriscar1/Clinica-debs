@@ -119,7 +119,18 @@ function SalaDeEsperaFoto({
   const [corParede, setCorParede] = useState(corParedeInicial);
   const [corSofa, setCorSofa] = useState(corSofaInicial);
   const [areaAtiva, setAreaAtivaState] = useState<AreaAtiva>(null);
-  const [fotosSofaDisponiveis, setFotosSofaDisponiveis] = useState<Record<string, boolean>>({});
+  const [fotosSofaDisponiveis, setFotosSofaDisponiveis] = useState<Record<string, boolean>>(
+    () => {
+      // A cor padrão (que usa a própria ambiente.jpg) já nasce marcada
+      // como disponível, sem precisar esperar nenhum carregamento —
+      // isso evita um lampejo do tingimento antigo logo na abertura.
+      const inicial: Record<string, boolean> = {};
+      CORES_SOFA.forEach((c) => {
+        if (c.imagem === CAMINHO_FOTO) inicial[c.valor] = true;
+      });
+      return inicial;
+    }
+  );
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Verifica, uma vez, quais fotos específicas de cada cor do sofá já
@@ -128,10 +139,7 @@ function SalaDeEsperaFoto({
   // por cima da foto padrão (comportamento atual, nunca quebra).
   useEffect(() => {
     CORES_SOFA.forEach((c) => {
-      if (c.imagem === CAMINHO_FOTO) {
-        setFotosSofaDisponiveis((prev) => ({ ...prev, [c.valor]: true }));
-        return;
-      }
+      if (c.imagem === CAMINHO_FOTO) return; // já marcada como disponível acima
       const img = new Image();
       img.onload = () => setFotosSofaDisponiveis((prev) => ({ ...prev, [c.valor]: true }));
       img.onerror = () => setFotosSofaDisponiveis((prev) => ({ ...prev, [c.valor]: false }));
@@ -246,31 +254,33 @@ function SalaDeEsperaFoto({
       {/* Área do sofá — clicável sempre. Só aplica o tingimento por cima
           quando ainda não existe uma foto real daquela cor específica;
           assim que a foto existir, a cor já vem certinha da própria
-          imagem, sem precisar de nenhum efeito. */}
+          imagem, sem precisar de nenhum efeito.
+          A máscara agora é um gradiente radial em CSS puro (antes usava
+          uma imagem PNG externa — se ela falhasse ao carregar em
+          produção, o navegador ignorava a máscara e mostrava o
+          retângulo inteiro, sem recorte nenhum, virando um "bloco" feio). */}
       <motion.button
         type="button"
         aria-label="Trocar a cor do sofá"
         onClick={() => interativo && setAreaAtiva((v) => (v === "sofa" ? null : "sofa"))}
         className={`absolute ${temFotoDoSofa ? "" : "mix-blend-color"}`}
         style={{
-          left: "2%",
-          top: "36%",
-          width: "96%",
-          height: "30%",
+          left: "6%",
+          top: "38%",
+          width: "88%",
+          height: "26%",
           backgroundColor: temFotoDoSofa ? "transparent" : corSofa,
-          opacity: temFotoDoSofa ? 1 : 0.45,
+          opacity: temFotoDoSofa ? 1 : 0.42,
           cursor: interativo ? "pointer" : "default",
           border: "none",
           padding: 0,
           ...(temFotoDoSofa
             ? {}
             : {
-                WebkitMaskImage: "url(/scene/sofa-mascara.png)",
-                maskImage: "url(/scene/sofa-mascara.png)",
-                WebkitMaskSize: "100% 100%",
-                maskSize: "100% 100%",
-                WebkitMaskRepeat: "no-repeat",
-                maskRepeat: "no-repeat",
+                WebkitMaskImage:
+                  "radial-gradient(ellipse 62% 60% at 50% 48%, black 0%, black 45%, transparent 88%)",
+                maskImage:
+                  "radial-gradient(ellipse 62% 60% at 50% 48%, black 0%, black 45%, transparent 88%)",
               }),
         }}
         whileTap={interativo ? { scale: 0.98 } : undefined}
